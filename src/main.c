@@ -32,7 +32,7 @@
 /* Private macro */
 #define AUDIOBUFFERSIZE         2500
 #define WAVEFREQ            	880 	/* 880Hz --> A5 */
-#define TIMER6_PRESCALER    	2     	/* produces a 42MHz tick */
+#define TIMER6_PRESCALER    	2     /* produces a 42MHz tick */
 #define TIMER_CLOCK           	84E6 	/* TIM6 runs at 84MHz */
 
 /* Private variables */
@@ -97,21 +97,21 @@ int main(void)
     /* Create wave table for example sin() wave */
     for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
     {
-    	AUDIOBuffer1[n] = 0.10*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n)/AUDIOBUFFERSIZE+1); /* Remember to cast! */
+    	AUDIOBuffer1[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*1760)/2200000+1); /* Remember to cast! */
     }
 
     /* Create wave table using a specified frequency */
-    for (uint16_t n = 0; n < 19919; n++)
+    for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
     	// TODO: Fix this equation cause it's really not working lol
-    	long double exp = -20*(n*6.25E-5);
-    	long double power = pow(M_E, exp);
-    	AUDIOBuffer[n] = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*50)/48000+1);
-    	AUDIOBuffer[n] = AUDIOBuffer[n]*power;
+//    	long double exp = -20*(n*6.25E-5);
+//    	long double power = pow(M_E, exp);
+    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*1300)/2200000+1);
+//    	AUDIOBuffer[n] = AUDIOBuffer[n]*power;
 	}
 
     /* Calculate frequency of timer */
-    fTimer = WAVEFREQ * AUDIOBUFFERSIZE;
+    fTimer = 10000;//WAVEFREQ * AUDIOBUFFERSIZE;
 
     /* Calculate Tick Rate */
     timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */
