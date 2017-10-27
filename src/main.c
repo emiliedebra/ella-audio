@@ -38,10 +38,12 @@
 /* Private variables */
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+uint16_t AUDIOBuffer1[AUDIOBUFFERSIZE];
 uint8_t beatFlag = 0;
 uint8_t audioPlayingFlag = 0;
 uint8_t changeToSilenceFlag = 0;
-
+uint16_t freq = 440;
+float frequencyScaler = 9.999E-5;
 uint8_t throwawayFlag = 0;
 uint8_t changeFlag = 0;
 /* Private function prototypes */
@@ -122,33 +124,22 @@ int main(void)
     /* Create wave table for sin() wave */
     for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
     {
-<<<<<<< HEAD
-    	AUDIOBuffer1[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*1760)/2200000+1); /* Remember to cast! */
-=======
-    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n)/100+1); /* Remember to cast! */
->>>>>>> refs/heads/master
+    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1); /* Remember to cast! */
     }
 
-<<<<<<< HEAD
     /* Create wave table using a specified frequency */
     for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
     	// TODO: Fix this equation cause it's really not working lol
 //    	long double exp = -20*(n*6.25E-5);
 //    	long double power = pow(M_E, exp);
-    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*1300)/2200000+1);
+    	freq = 392;
+    	AUDIOBuffer1[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1);
 //    	AUDIOBuffer[n] = AUDIOBuffer[n]*power;
 	}
 
-=======
->>>>>>> refs/heads/master
     /* Calculate frequency of timer */
-<<<<<<< HEAD
     fTimer = 10000;//WAVEFREQ * AUDIOBUFFERSIZE;
-=======
-    //fTimer = WAVEFREQ * AUDIOBUFFERSIZE;
-    fTimer = 10000;
->>>>>>> refs/heads/master
 
     /* Calculate Tick Rate */
     timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */ //42MHz
@@ -183,7 +174,7 @@ int main(void)
 
     	if(changeFlag == 1){
 			if (throwawayFlag == 1){
-				DMA_ChangeBuffer(silenceBuffer);
+				DMA_ChangeBuffer(AUDIOBuffer1);
 				throwawayFlag = 0;
 			}
 			else {
@@ -195,15 +186,17 @@ int main(void)
 
 
 //    	// check for button pressed
-//		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
-//
-//			/* Debounce */
-//			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
-//
-//			DMA_ChangeBuffer(AUDIOBuffer);
-//			audioPlayingFlag = 1;
-//
-//		}
+		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
+
+			/* Debounce */
+			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
+			freq += 0.0001;
+			for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+			{
+				AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq)+1); /* Remember to cast! */
+			}
+
+		}
 //
 //		/* Debounce */
 //		delay_ms(1);
