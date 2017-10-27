@@ -30,7 +30,7 @@
 #include "stm32f4_discovery.h"
 #include "math.h"
 /* Private macro */
-#define AUDIOBUFFERSIZE         2500
+#define AUDIOBUFFERSIZE         9000
 #define WAVEFREQ            	880 	/* 880Hz --> A5 */
 #define TIMER6_PRESCALER    	2     /* produces a 42MHz tick */
 #define TIMER_CLOCK           	84E6 	/* TIM6 runs at 84MHz */
@@ -38,9 +38,12 @@
 /* Private variables */
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-uint16_t AUDIOBuffer1[AUDIOBUFFERSIZE];
 uint8_t beatFlag = 0;
-uint8_t buttonPress = 1;
+uint8_t audioPlayingFlag = 0;
+uint8_t changeToSilenceFlag = 0;
+
+uint8_t throwawayFlag = 0;
+uint8_t changeFlag = 0;
 /* Private function prototypes */
 /* Private functions */
 void RCC_Configuration(void);
@@ -67,10 +70,33 @@ void TIM2_IRQHandler(void)
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 
     // for now, timer2 shouldn't do anything, though we might want to use it later to do something,
-    // so I am leaving it here for now (uncomment the set up in Timer_Configuration)
+    // so I am leaving it here for now (un comment the set up in Timer_Configuration
     STM_EVAL_LEDToggle(LED4);
-    beatFlag = 1;
+    //beatFlag = 1;
+
   }
+}
+
+
+void DMA1_Stream5_IRQHandler(void){
+	if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5) == SET) {
+		DMA_ClearITPendingBit(DMA1_Stream4, DMA_IT_TCIF5);
+
+	    STM_EVAL_LEDToggle(LED6);
+
+	    changeFlag = 1;
+
+
+	    //if audio is playing, we need to change it to silence
+//	    if(audioPlayingFlag == 1){
+//	    	//audioPlayingFlag = 0;
+//	    	changeToSilenceFlag = 1;
+//	    	STM_EVAL_LEDToggle(LED6);
+//	    }
+
+		//when it has finished transferring, change the buffer to silence
+
+	}
 }
 
 
@@ -86,7 +112,6 @@ int main(void)
     uint32_t fTimer;
     uint32_t timerFreq;
     uint16_t timerPeriod;
-    uint8_t buffNum = 1;
 
     STM_EVAL_LEDInit(LED3);
     STM_EVAL_LEDInit(LED4);
@@ -94,12 +119,17 @@ int main(void)
     STM_EVAL_LEDInit(LED6);
 
 
-    /* Create wave table for example sin() wave */
+    /* Create wave table for sin() wave */
     for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
     {
+<<<<<<< HEAD
     	AUDIOBuffer1[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*1760)/2200000+1); /* Remember to cast! */
+=======
+    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n)/100+1); /* Remember to cast! */
+>>>>>>> refs/heads/master
     }
 
+<<<<<<< HEAD
     /* Create wave table using a specified frequency */
     for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
@@ -110,14 +140,23 @@ int main(void)
 //    	AUDIOBuffer[n] = AUDIOBuffer[n]*power;
 	}
 
+=======
+>>>>>>> refs/heads/master
     /* Calculate frequency of timer */
+<<<<<<< HEAD
     fTimer = 10000;//WAVEFREQ * AUDIOBUFFERSIZE;
+=======
+    //fTimer = WAVEFREQ * AUDIOBUFFERSIZE;
+    fTimer = 10000;
+>>>>>>> refs/heads/master
 
     /* Calculate Tick Rate */
-    timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */
+    timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */ //42MHz
 
     /* Calculate period of Timer */
     timerPeriod = (uint16_t)( timerFreq / fTimer );
+
+
 
     /* System Clocks Configuration */
     RCC_Configuration();
@@ -135,41 +174,47 @@ int main(void)
     DAC_Configuration();
 
     /* DMA Config */
-    DMA_Configuration(AUDIOBuffer);
+    DMA_Configuration(silenceBuffer);
 
     //init the push button
     STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
 
     while (1) {
-    	// NOTE from Em: This should preferably be an empty while loop
-    	// interrupts should handle everything
 
-    	// check button to allow toggle on and off
-    	if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
-    		/* Debounce */
-			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
-			DMA_ChangeBuffer(silenceBuffer); // NOTE from Em: This doesn't actually seem to work
-    	} else {
-    		//check for beat flag if buttonPressed
-			if(beatFlag == 1){
-
-				STM_EVAL_LEDToggle(LED3);
-
-				/* Configure Saw Tooth */
-				if (buffNum == 1) {
-					DMA_ChangeBuffer(AUDIOBuffer1);
-					buffNum = 2;
-				}
-
-				/* Configure Sine Wave */
-				else {
-					DMA_ChangeBuffer(AUDIOBuffer);
-					buffNum = 1;
-				}
-
-				beatFlag = 0;
+    	if(changeFlag == 1){
+			if (throwawayFlag == 1){
+				DMA_ChangeBuffer(silenceBuffer);
+				throwawayFlag = 0;
 			}
+			else {
+				DMA_ChangeBuffer(AUDIOBuffer);
+				throwawayFlag = 1;
+			}
+			changeFlag = 0;
     	}
+
+
+//    	// check for button pressed
+//		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
+//
+//			/* Debounce */
+//			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
+//
+//			DMA_ChangeBuffer(AUDIOBuffer);
+//			audioPlayingFlag = 1;
+//
+//		}
+//
+//		/* Debounce */
+//		delay_ms(1);
+//
+//		if(changeToSilenceFlag == 1){
+//	    	DMA_ChangeBuffer(silenceBuffer);
+//	    	changeToSilenceFlag = 0;
+//	    	audioPlayingFlag = 0;
+//		}
+
+
     }
 }
 
@@ -204,12 +249,13 @@ void NVIC_Configuration(void)
 
     NVIC_Init(&NVIC_InitStructure);
 
-    /* Enable DMA1 Stream5 IRQ Channel */
+    //from the internet
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+
 }
 
 
@@ -236,22 +282,9 @@ void GPIO_Configuration(void)
 
 }
 
-/* Function to change DMA Buffer Array */
 void DMA_ChangeBuffer(uint16_t *waveBuffer){
 	DMA_Cmd(DMA1_Stream5, DISABLE);
 	DMA_Configuration(waveBuffer);
-}
-
-/* DMA Interrupt Handler */
-void DMA1_Stream5_IRQHandler(void)
-{
-  //Test on DMA1 Channel 7 Transfer Complete interrupt
-  if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5) != RESET)
-  {
-    // TODO: Handle Transfer Complete Callback
-	//Clear DMA1 Channel 7 Transfer Complete interrupt pending bits
-    DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
-  }
 }
 
 
@@ -283,11 +316,13 @@ void DMA_Configuration(uint16_t * waveBuffer)
     DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;			//? - dont think it is important
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;					//? - dont think it is important
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;			//? - dont think it is important
+
     /* Call Init function */
     DMA_Init(DMA1_Stream5, &DMA_InitStructure);
 
     /* Enable the Transfer Complete Interrupt */
-	DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+  	DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+
     /* Enable DMA */
     DMA_Cmd(DMA1_Stream5, ENABLE);
 
@@ -303,7 +338,7 @@ void Timer_Configuration(uint16_t wavPeriod, uint16_t preScaler)
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStruct;
 
     /* pack Timer struct */
-    TIM_TimeBaseStruct.TIM_Period = wavPeriod-1; // should be <count frequency>/<wave res>*<audio frequency>
+    TIM_TimeBaseStruct.TIM_Period = wavPeriod-1;
     TIM_TimeBaseStruct.TIM_Prescaler = preScaler-1;
     TIM_TimeBaseStruct.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStruct.TIM_CounterMode = TIM_CounterMode_Up;
