@@ -29,36 +29,14 @@
 #include "stm32f4xx.h"
 #include "stm32f4_discovery.h"
 #include "math.h"
-/* Private macro */
-#define AUDIOBUFFERSIZE         9000
-#define WAVEFREQ            	880 	/* 880Hz --> A5 */
-#define TIMER6_PRESCALER    	2     	/* produces a 42MHz tick */
-#define TIMER_CLOCK           	84E6 	/* TIM6 runs at 84MHz */
+#include "main.h"
 
-/* Private variables */
-uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
-uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-uint8_t beatFlag = 0;
-uint8_t audioPlayingFlag = 0;
-uint8_t changeToSilenceFlag = 0;
-
-uint8_t throwawayFlag = 0;
-uint8_t changeFlag = 0;
-/* Private function prototypes */
-/* Private functions */
-void RCC_Configuration(void);
-void DMA_Configuration(uint16_t * waveBuffer);
-void DMA_ChangeBuffer(uint16_t *waveBuffer);
-void NVIC_Configuration(void);
-void GPIO_Configuration(void);
-void UART_Configuration(void);
-void Timer_Configuration(uint16_t wavPeriod, uint16_t preScaler);
-void DAC_Configuration(void);
-void delay_ms(uint32_t milli);
 
 /*******************************************************************************
 * Function Name  : TIM2_IRQHandler
 * Description    : This function handles TIM2 global interrupt request.
+* 				   This timer represents the tempo of the instrument and
+* 				   thus the interrupt causes the beat.
 * Input          : None
 * Output         : None
 * Return         : None
@@ -69,33 +47,31 @@ void TIM2_IRQHandler(void)
   {
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 
-    // for now, timer2 shouldn't do anything, though we might want to use it later to do something,
-    // so I am leaving it here for now (un comment the set up in Timer_Configuration
+    //change the LED to show the beat
     STM_EVAL_LEDToggle(LED4);
-    //beatFlag = 1;
+    //set the beat flag so a beat can be computed and played in the main loop
+    beatFlag = 1;
 
   }
 }
 
-
+/*******************************************************************************
+* Function Name  : DMA1_Stream5_IRQHandler
+* Description    : This function handles the Transfer Complete Interrupt of the
+* 				   DMA1 Stream 5. This checks will cause the change from audio
+* 				   playing back to silence.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
 void DMA1_Stream5_IRQHandler(void){
 	if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5) == SET) {
 		DMA_ClearITPendingBit(DMA1_Stream4, DMA_IT_TCIF5);
-
-	    STM_EVAL_LEDToggle(LED6);
-
-	    changeFlag = 1;
-
-
-	    //if audio is playing, we need to change it to silence
-//	    if(audioPlayingFlag == 1){
-//	    	//audioPlayingFlag = 0;
-//	    	changeToSilenceFlag = 1;
-//	    	STM_EVAL_LEDToggle(LED6);
-//	    }
-
-		//when it has finished transferring, change the buffer to silence
-
+		//if audio is playing now, then we want to change back to silence
+		if (audioPlayingFlag == 1){
+			DMA_ChangeBuffer(silenceBuffer);
+			audioPlayingFlag = 0;
+		}
 	}
 }
 
@@ -111,12 +87,7 @@ int main(void)
 {
     uint32_t fTimer;
     uint32_t timerFreq;
-    uint16_t timerPeriod;
-
-    STM_EVAL_LEDInit(LED3);
-    STM_EVAL_LEDInit(LED4);
-    STM_EVAL_LEDInit(LED5);
-    STM_EVAL_LEDInit(LED6);
+    uint16_t DMA_timerPeriod;
 
 
     /* Create wave table for sin() wave */
@@ -128,74 +99,99 @@ int main(void)
     /* Calculate frequency of timer */
     //fTimer = WAVEFREQ * AUDIOBUFFERSIZE;
     fTimer = 10000;
-
     /* Calculate Tick Rate */
     timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */ //42MHz
-
     /* Calculate period of Timer */
-    timerPeriod = (uint16_t)( timerFreq / fTimer );
+    DMA_timerPeriod = (uint16_t)( timerFreq / fTimer );
 
 
+    /* Set up the micro */
+    Controller_Setup(DMA_timerPeriod);
 
-    /* System Clocks Configuration */
-    RCC_Configuration();
-
-    /* NVIC configuration */
-    NVIC_Configuration();
-
-    /* Configure the GPIO ports */
-    GPIO_Configuration();
-
-    /* Timer Configuration */
-    Timer_Configuration( timerPeriod, TIMER6_PRESCALER );
-
-    /* DAC Configuration */
-    DAC_Configuration();
-
-    /* DMA Config */
-    DMA_Configuration(silenceBuffer);
-
-    //init the push button
-    STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
+    //check the tempo on the hardware and set it
+    //TODO: CHECK TEMPO
+    setTempo(60);
 
     while (1) {
 
-    	if(changeFlag == 1){
-			if (throwawayFlag == 1){
-				DMA_ChangeBuffer(silenceBuffer);
-				throwawayFlag = 0;
-			}
-			else {
+    	//THIS WONT BE HERE IN THE FINAL THING
+		//===========================================================================================================
+		// check for button pressed
+		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
+			/* Debounce */
+			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
+
+			if(audioPlayingFlag != 1){
 				DMA_ChangeBuffer(AUDIOBuffer);
-				throwawayFlag = 1;
+				audioPlayingFlag = 1;
 			}
-			changeFlag = 0;
-    	}
+		}
+		/* Debounce */
+		delay_ms(1);
+		//===========================================================================================================
 
 
-//    	// check for button pressed
-//		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
-//
-//			/* Debounce */
-//			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
-//
-//			DMA_ChangeBuffer(AUDIOBuffer);
-//			audioPlayingFlag = 1;
-//
-//		}
-//
-//		/* Debounce */
-//		delay_ms(1);
-//
-//		if(changeToSilenceFlag == 1){
-//	    	DMA_ChangeBuffer(silenceBuffer);
-//	    	changeToSilenceFlag = 0;
-//	    	audioPlayingFlag = 0;
-//		}
+
+		//handles the playing of a beat
+		if(beatFlag == 1){
+
+			//get the note array from hardware
+
+			//compute array for the audio to be played
+
+
+			//play the audio
+			DMA_ChangeBuffer(AUDIOBuffer);
+
+			//change the tempo if it needs to change
+
+			//update the beat counter ad beat flag
+			beatCounter++;
+			if(beatCounter>=8) beatCounter = 0;
+			beatFlag = 0;
+		}
 
 
     }
 }
+/**
+ * Sets up all the peripherals and background shit on the micro.
+ * Sets up the clocks, NVIC, GPIO pins (pins for audio out, LEDS and Push Button),
+ * Timer for the DMA, the DAC, and the DMA.
+ * This initializes the DMA with the silence buffer so
+ * on startup the micro just plays silence.
+ * Sets up the tempo of the device to 60BPM so change it immediately.
+ */
+void Controller_Setup(uint16_t DMA_timerPeriod){
+
+	/* LED Configuration */
+    STM_EVAL_LEDInit(LED3);
+    STM_EVAL_LEDInit(LED4);
+    STM_EVAL_LEDInit(LED5);
+    STM_EVAL_LEDInit(LED6);
+
+	/* System Clocks Configuration */
+	RCC_Configuration();
+
+	/* NVIC configuration */
+	NVIC_Configuration();
+
+	/* Configure the GPIO ports */
+	GPIO_Configuration();
+
+	/* Timer Configuration */
+	Timer_Configuration( DMA_timerPeriod, TIMER6_PRESCALER);
+
+	/* DAC Configuration */
+	DAC_Configuration();
+
+	/* DMA Config */
+	DMA_Configuration(silenceBuffer);
+
+	//init the push button
+	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
+}
+
 
 /**
   * @brief  Configures the different system clocks.
@@ -218,17 +214,15 @@ void RCC_Configuration(void)
   */
 void NVIC_Configuration(void)
 {
-	//NOTE (from Luke): What I think this doing is setting up the TIM2_IRQHandler as above.
-	// This is important to remember when setting up a timer that needs a handler
+	//Sets up the IRQ Handler for TIMER 2
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-
     NVIC_Init(&NVIC_InitStructure);
 
-    //from the internet
+    //Sets up the IRQ Handler for the DMA transfer
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream5_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
@@ -261,6 +255,22 @@ void GPIO_Configuration(void)
 
 }
 
+
+/**
+  * @brief  Sets the period of TIM2, which is the tempo of the device
+  * @param  uint16_t bpm
+  * @retval : None
+  */
+void setTempo(uint16_t bpm){
+	uint32_t tempoPeriod = -700 * bpm + 126000;
+	TIM2->ARR = tempoPeriod - 1;
+}
+
+/**
+  * @brief  Changes the buffer the DMA is sending to the DAC
+  * @param  uint16_t *waveBuffer
+  * @retval : None
+  */
 void DMA_ChangeBuffer(uint16_t *waveBuffer){
 	DMA_Cmd(DMA1_Stream5, DISABLE);
 	DMA_Configuration(waveBuffer);
@@ -332,9 +342,10 @@ void Timer_Configuration(uint16_t wavPeriod, uint16_t preScaler)
     /* TIM6 enable counter */
     TIM_Cmd(TIM6, ENABLE);
 
-    /* TIM2 Set Up */ //commented out for now, see the handler above
+    /* TIM2 Set Up */
     TIM_TimeBaseStruct.TIM_Period = 84000-1;
     TIM_TimeBaseStruct.TIM_Prescaler = 1000-1;
+
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStruct);
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_Cmd(TIM2, ENABLE);
