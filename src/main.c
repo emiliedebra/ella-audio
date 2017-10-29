@@ -39,6 +39,7 @@
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t AUDIOBuffer1[AUDIOBUFFERSIZE];
+uint16_t AUDIOBuffer2[AUDIOBUFFERSIZE];
 uint8_t beatFlag = 0;
 uint8_t audioPlayingFlag = 0;
 uint8_t changeToSilenceFlag = 0;
@@ -121,21 +122,27 @@ int main(void)
     STM_EVAL_LEDInit(LED6);
 
 
-    /* Create wave table for sin() wave */
-    for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
-    {
-    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1); /* Remember to cast! */
-    }
+    	freq = 392;
+        /* Create wave table using a specified frequency */
+        for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+    	{
+        	float threethousand = n/(double)5000;
+        	uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1)*pow(M_E, -pow(threethousand, 2));
+        	AUDIOBuffer[n] = val;
+        	AUDIOBuffer[n] += 0.05*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1);
+    	}
 
+
+
+
+    freq = 440;
     /* Create wave table using a specified frequency */
     for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-    	// TODO: Fix this equation cause it's really not working lol
-//    	long double exp = -20*(n*6.25E-5);
-//    	long double power = pow(M_E, exp);
-    	freq = 392;
-    	AUDIOBuffer1[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1);
-//    	AUDIOBuffer[n] = AUDIOBuffer[n]*power;
+    	float ninth = 1/(double)9;
+    	float threethousand = n/(double)5000;
+    	AUDIOBuffer1[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1)*pow(M_E, -pow(threethousand, 2));
+//    	AUDIOBuffer1[n] += 0.05*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq*frequencyScaler)+1);
 	}
 
     /* Calculate frequency of timer */
@@ -173,13 +180,13 @@ int main(void)
     while (1) {
 
     	if(changeFlag == 1){
-			if (throwawayFlag == 1){
-				DMA_ChangeBuffer(AUDIOBuffer1);
+			if (throwawayFlag == 1) {
+				DMA_ChangeBuffer(AUDIOBuffer2);
 				throwawayFlag = 0;
 			}
 			else {
-				DMA_ChangeBuffer(AUDIOBuffer);
-				throwawayFlag = 1;
+				DMA_ChangeBuffer(silenceBuffer);
+				throwawayFlag++;
 			}
 			changeFlag = 0;
     	}
@@ -190,11 +197,12 @@ int main(void)
 
 			/* Debounce */
 			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
-			freq += 0.0001;
-			for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
-			{
-				AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*freq)+1); /* Remember to cast! */
-			}
+//			freq += 0.0001;
+//			for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//			{
+//				AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*440*frequencyScaler)+1)*pow(M_E, -pow(n/4000, 2))+0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*392*frequencyScaler)+1)*pow(M_E, -pow(n/4000, 2)); /* Remember to cast! */
+//			}
+			DMA_ChangeBuffer(silenceBuffer);
 
 		}
 //
