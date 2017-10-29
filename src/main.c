@@ -91,13 +91,9 @@ int main(void)
 
 
     /* Create wave table for sin() wave */
-    for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
-    {
-    	AUDIOBuffer[n] = 0.5*(uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n)/100+1); /* Remember to cast! */
-    }
+    fillBuffer(frequency[beatCounter]); // fill buffer with first note
 
     /* Calculate frequency of timer */
-    //fTimer = WAVEFREQ * AUDIOBUFFERSIZE;
     fTimer = 10000;
     /* Calculate Tick Rate */
     timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */ //42MHz
@@ -135,23 +131,26 @@ int main(void)
 		//handles the playing of a beat
 		if(beatFlag == 1){
 
-			//get the note array from hardware
+			// get the note array from hardware
 
-			//compute array for the audio to be played
-
+			// compute array for the audio to be played
+			/* fillBuffer(frequency[0]); // fill buffer with first note
+			   for (int i = 1; i < 8; i++) {
+			 	 if char at i is 1
+			 	 addToBuffer(frequency[i]);
+			   } */
 
 			//play the audio
 			DMA_ChangeBuffer(AUDIOBuffer);
+			audioPlayingFlag = 1;
 
 			//change the tempo if it needs to change
 
-			//update the beat counter ad beat flag
+			//update the beat counter and beat flag
 			beatCounter++;
 			if(beatCounter>=8) beatCounter = 0;
 			beatFlag = 0;
 		}
-
-
     }
 }
 /**
@@ -255,7 +254,43 @@ void GPIO_Configuration(void)
 
 }
 
+/**
+  * @brief  fills buffer (overwrite)
+  * @param  uint16_t frequency
+  * @retval : None
+  */
+void fillBuffer(uint16_t frequency) {
+	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+	{
+		float fourthousand = n/(double)4000;
+		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(fourthousand, 2));
+		AUDIOBuffer[n] = val;
+	}
+}
 
+/**
+  * @brief  adds wave to buffer (no overwrite)
+  * @param  uint16_t frequency
+  * @retval : None
+  */
+void addToBuffer(uint16_t frequency) {
+	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+	{
+		float fourthousand = n/(double)4000;
+		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(foruthousand, 2));
+
+		// if both sounds are quiet
+		if (val < 1023 && AUDIOBuffer[n] < 1023) {
+			uint16_t newVal = (uint16_t)((AUDIOBuffer[n]*val)/(double)(1023.5));
+			AUDIOBuffer[n] = newVal;
+		}
+		// if both either sound is fairly loud
+		else {
+			uint16_t newVal = (uint16_t)(2*(AUDIOBuffer[n] + val) - (AUDIOBuffer[n] * val)/(double)(1023.5) - 2047);
+			AUDIOBuffer[n] = newVal;
+		}
+	}
+}
 /**
   * @brief  Sets the period of TIM2, which is the tempo of the device
   * @param  uint16_t bpm
