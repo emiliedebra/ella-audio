@@ -75,6 +75,25 @@ void DMA1_Stream5_IRQHandler(void){
 	}
 }
 
+/*******************************************************************************
+* Function Name  :
+* Description    :
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USART2_IRQHandler(void){
+
+	/* RXNE handler */
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) == SET) {
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+
+		if(USART_ReceiveData(USART2) == 0xFF){
+			STM_EVAL_LEDOn(LED5);
+		}
+	}
+}
+
 
 /**
 **===========================================================================
@@ -112,44 +131,58 @@ int main(void)
     //TODO: CHECK TEMPO
     setTempo(60);
 
+
+    while(1){
+		if(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET){
+			/* Debounce */
+			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
+			//send data to the Interface Micro
+			USART_SendData(USART2, 0x01);
+			STM_EVAL_LEDToggle(LED3);
+			//while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET){}
+		}
+		delay_ms(2);
+    }
+
+
     while (1) {
 
     	//THIS WONT BE HERE IN THE FINAL THING
 		//===========================================================================================================
 		// check for button pressed
-		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
-			/* Debounce */
-			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
-
-			if(audioPlayingFlag != 1){
-				DMA_ChangeBuffer(AUDIOBuffer);
-				audioPlayingFlag = 1;
-			}
-		}
-		/* Debounce */
-		delay_ms(1);
+//		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
+//			/* Debounce */
+//			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
+//
+//			if(audioPlayingFlag != 1){
+//				DMA_ChangeBuffer(AUDIOBuffer);
+//				audioPlayingFlag = 1;
+//			}
+//		}
+//		/* Debounce */
+//		delay_ms(1);
 		//===========================================================================================================
 
 
-
-		//handles the playing of a beat
-		if(beatFlag == 1){
-
-			//get the note array from hardware
-
-			//compute array for the audio to be played
-
-
-			//play the audio
-			DMA_ChangeBuffer(AUDIOBuffer);
-
-			//change the tempo if it needs to change
-
-			//update the beat counter ad beat flag
-			beatCounter++;
-			if(beatCounter>=8) beatCounter = 0;
-			beatFlag = 0;
-		}
+//
+//		//handles the playing of a beat
+//		if(beatFlag == 1){
+//
+//			//get the note array from hardware
+//
+//			//compute array for the audio to be played
+//
+//
+//			//play the audio
+//			//DMA_ChangeBuffer(AUDIOBuffer);
+//
+//			//change the tempo if it needs to change
+//
+//			//update the beat counter ad beat flag
+//			beatCounter++;
+//			if(beatCounter>=8) beatCounter = 0;
+//			beatFlag = 0;
+//		}
 
 
     }
@@ -203,8 +236,10 @@ void RCC_Configuration(void)
     /* Enable DMA and GPIOA Clocks */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA, ENABLE);
 
-    /* Enable DAC1 and TIM6 & TIM2 clocks */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2, ENABLE);
+    /* Enable DAC1 and TIM6 & TIM2 clocks and ASART2 */
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2 | RCC_APB1Periph_USART2, ENABLE);
+
+
 }
 
 /**
@@ -228,6 +263,21 @@ void NVIC_Configuration(void)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+
+    //set up the IRQ Handler for the USART2 Receieve Transfer
+    /**
+     * Set Channel to USART1
+     * Set Channel Cmd to enable. That will enable USART1 channel in NVIC
+     * Set Both priorities to 0. This means high priority
+     *
+     * Initialize NVIC
+     */
+    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_Init(&NVIC_InitStructure);
+
 
 }
 
@@ -253,6 +303,22 @@ void GPIO_Configuration(void)
     /* Call Init function */
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+
+    //set up pins A2 and A3 for UART
+    /**
+    * Tell pins PA2 and PA3 which alternating function you will use
+    * @important Make sure, these lines are before pins configuration!
+    */
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+    // Initialize pins as alternating function
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStruct);
+
 }
 
 
@@ -276,6 +342,36 @@ void DMA_ChangeBuffer(uint16_t *waveBuffer){
 	DMA_Configuration(waveBuffer);
 }
 
+void UART_Configuration(){
+	/**
+	 * Set Baudrate to value you pass to function
+	 * Disable Hardware Flow control
+	 * Set Mode To TX and RX, so USART will work in full-duplex mode
+	 * Disable parity bit
+	 * Set 1 stop bit
+	 * Set Data bits to 8
+	 *
+	 * Initialize USART1
+	 * Activate USART1
+	 */
+	USART_InitTypeDef USART_InitStruct;
+
+	USART_InitStruct.USART_BaudRate = 9600;
+	USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+	USART_InitStruct.USART_Parity = USART_Parity_No;
+	USART_InitStruct.USART_StopBits = USART_StopBits_1;
+	USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+
+
+	USART_Init(USART2, &USART_InitStruct);
+	USART_Cmd(USART2, ENABLE);
+
+	/**
+	 * Enable RX interrupt
+	 */
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
 
 /**
   * @brief  Configures the DMA.
