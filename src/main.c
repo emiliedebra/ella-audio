@@ -1,45 +1,13 @@
-/**
-*****************************************************************************
-**
-**  File        : main.c
-**
-**  Abstract    : main function.
-**
-**  Functions   : main
-**
-**  Environment : Atollic TrueSTUDIO(R)
-**                STMicroelectronics STM32F4xx Standard Peripherals Library
-**
-**  Distribution: The file is distributed “as is,” without any warranty
-**                of any kind.
-**
-**  (c)Copyright Atollic AB.
-**  You may use this file as-is or modify it according to the needs of your
-**  project. Distribution of this file (unmodified or modified) is not
-**  permitted. Atollic AB permit registered Atollic TrueSTUDIO(R) users the
-**  rights to distribute the assembled, compiled & linked contents of this
-**  file as part of an application binary file, provided that it is built
-**  using the Atollic TrueSTUDIO(R) toolchain.
-**
-**
-*****************************************************************************
-*/
 
 /* Includes */
-#include "stm32f4xx.h"
-#include "stm32f4_discovery.h"
-#include "math.h"
 #include "main.h"
 
-
+/* -------- Handlers --------- */
 /*******************************************************************************
 * Function Name  : TIM2_IRQHandler
 * Description    : This function handles TIM2 global interrupt request.
 * 				   This timer represents the tempo of the instrument and
 * 				   thus the interrupt causes the beat.
-* Input          : None
-* Output         : None
-* Return         : None
 *******************************************************************************/
 void TIM2_IRQHandler(void)
 {
@@ -60,9 +28,6 @@ void TIM2_IRQHandler(void)
 * Description    : This function handles the Transfer Complete Interrupt of the
 * 				   DMA1 Stream 5. This checks will cause the change from audio
 * 				   playing back to silence.
-* Input          : None
-* Output         : None
-* Return         : None
 *******************************************************************************/
 void DMA1_Stream5_IRQHandler(void){
 	if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5) == SET) {
@@ -89,17 +54,12 @@ int main(void)
     uint32_t timerFreq;
     uint16_t DMA_timerPeriod;
 
-
-    /* Create wave table for sin() wave */
-    fillBuffer(frequency[beatCounter]); // fill buffer with first note
-
     /* Calculate frequency of timer */
     fTimer = 10000;
     /* Calculate Tick Rate */
     timerFreq = TIMER_CLOCK / TIMER6_PRESCALER; /* Timer tick is in Hz */ //42MHz
     /* Calculate period of Timer */
     DMA_timerPeriod = (uint16_t)( timerFreq / fTimer );
-
 
     /* Set up the micro */
     Controller_Setup(DMA_timerPeriod);
@@ -112,11 +72,17 @@ int main(void)
 
     	//THIS WONT BE HERE IN THE FINAL THING
 		//===========================================================================================================
-		// check for button pressed
+
+    	// Uncomment when you want to actually program AUDIOBuffer to flash
+    	// programFlash(ADDR_FLASH_SECTOR_5, AUDIOBuffer, 5000);
+
+    	// check for button pressed
 		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
 			/* Debounce */
 			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
 
+			// fill buffer with one of the notes (for testing purposes)
+			fillBuffer(frequency[beatCounter]);
 			if(audioPlayingFlag != 1){
 				DMA_ChangeBuffer(AUDIOBuffer);
 				audioPlayingFlag = 1;
@@ -126,14 +92,12 @@ int main(void)
 		delay_ms(1);
 		//===========================================================================================================
 
-
-
 		//handles the playing of a beat
 		if(beatFlag == 1){
 
-			// get the note array from hardware
+			// TODO: get the note array from hardware
 
-			// compute array for the audio to be played
+			// TODO: compute array for the audio to be played
 			/* fillBuffer(frequency[0]); // fill buffer with first note
 			   for (int i = 1; i < 8; i++) {
 			 	 if char at i is 1
@@ -144,7 +108,7 @@ int main(void)
 			DMA_ChangeBuffer(AUDIOBuffer);
 			audioPlayingFlag = 1;
 
-			//change the tempo if it needs to change
+			//change the tempo or volume if it needs to change
 
 			//update the beat counter and beat flag
 			beatCounter++;
@@ -153,8 +117,31 @@ int main(void)
 		}
     }
 }
+
+/* ---------- Controller Methods ---------- */
 /**
- * Sets up all the peripherals and background shit on the micro.
+  * @brief  Sets the period of TIM2, which is the tempo of the device
+  * @param  uint16_t bpm
+  * @retval : None
+  */
+void setTempo(uint16_t bpm){
+	uint32_t tempoPeriod = -700 * bpm + 126000;
+	TIM2->ARR = tempoPeriod - 1;
+}
+
+/**
+  * @brief  Changes the buffer the DMA is sending to the DAC
+  * @param  uint16_t *waveBuffer
+  * @retval : None
+  */
+void DMA_ChangeBuffer(uint16_t *waveBuffer){
+	DMA_Cmd(DMA1_Stream5, DISABLE);
+	DMA_Configuration(waveBuffer);
+}
+
+/* ------------ Configuration Methods ----------- */
+/**
+ * Sets up all the peripherals and background operations on the micro.
  * Sets up the clocks, NVIC, GPIO pins (pins for audio out, LEDS and Push Button),
  * Timer for the DMA, the DAC, and the DMA.
  * This initializes the DMA with the silence buffer so
@@ -255,64 +242,6 @@ void GPIO_Configuration(void)
 }
 
 /**
-  * @brief  fills buffer (overwrite)
-  * @param  uint16_t frequency
-  * @retval : None
-  */
-void fillBuffer(uint16_t frequency) {
-	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
-	{
-		float fourthousand = n/(double)4000;
-		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(fourthousand, 2));
-		AUDIOBuffer[n] = val;
-	}
-}
-
-/**
-  * @brief  adds wave to buffer (no overwrite)
-  * @param  uint16_t frequency
-  * @retval : None
-  */
-void addToBuffer(uint16_t frequency) {
-	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
-	{
-		float fourthousand = n/(double)4000;
-		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(foruthousand, 2));
-
-		// if both sounds are quiet
-		if (val < 1023 && AUDIOBuffer[n] < 1023) {
-			uint16_t newVal = (uint16_t)((AUDIOBuffer[n]*val)/(double)(1023.5));
-			AUDIOBuffer[n] = newVal;
-		}
-		// if both either sound is fairly loud
-		else {
-			uint16_t newVal = (uint16_t)(2*(AUDIOBuffer[n] + val) - (AUDIOBuffer[n] * val)/(double)(1023.5) - 2047);
-			AUDIOBuffer[n] = newVal;
-		}
-	}
-}
-/**
-  * @brief  Sets the period of TIM2, which is the tempo of the device
-  * @param  uint16_t bpm
-  * @retval : None
-  */
-void setTempo(uint16_t bpm){
-	uint32_t tempoPeriod = -700 * bpm + 126000;
-	TIM2->ARR = tempoPeriod - 1;
-}
-
-/**
-  * @brief  Changes the buffer the DMA is sending to the DAC
-  * @param  uint16_t *waveBuffer
-  * @retval : None
-  */
-void DMA_ChangeBuffer(uint16_t *waveBuffer){
-	DMA_Cmd(DMA1_Stream5, DISABLE);
-	DMA_Configuration(waveBuffer);
-}
-
-
-/**
   * @brief  Configures the DMA.
   * @param  None
   * @retval : None
@@ -327,7 +256,7 @@ void DMA_Configuration(uint16_t * waveBuffer)
     /* PACK YOUR INIT STRUCT HERE */
     DMA_InitStructure.DMA_Channel = DMA_Channel_7;								//the channel we are using
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(DAC_BASE + 0x08);		//what peripheral we are linking the DMA to
-    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)(waveBuffer);			//what data we are linking to the DMA
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)(waveBuffer);				//what data we are linking to the DMA
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;						//the direction things must flow: memory to peripheral
     DMA_InitStructure.DMA_BufferSize = (uint32_t)AUDIOBUFFERSIZE;				//the size, or length of the data
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;			//We dont want to change the location of the peripheral we send to, so we disable the peripheral address increment
@@ -416,6 +345,7 @@ void DAC_Configuration(void)
 }
 
 
+/* ---------- Helper Functions ---------- */
 void delay_ms(uint32_t milli)
 {
 	uint32_t delay = milli * 17612;              // approximate loops per ms at 168 MHz, Debug config
@@ -423,8 +353,7 @@ void delay_ms(uint32_t milli)
 }
 
 
-//These have to be here for some reason. I deleted them and then it wouldnt build :C
-
+// Here to prevent Atollic from complaining
 /*
  * Callback used by stm32f4_discovery_audio_codec.c.
  * Refer to stm32f4_discovery_audio_codec.h for more info.
