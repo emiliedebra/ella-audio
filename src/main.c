@@ -204,15 +204,16 @@ int main(void)
     //TODO: CHECK TEMPO
     setTempo(60);
 
-
-    char red = 0b11001100;
-	char green = 0b11001100;
-	char blue = 0b11001100;
-	char column = 0b11001100;
+    //LIAMS TEST CODE -- IGNORE
+    char red = 0b11110000;
+	char green = 0b11111111;
+	char blue = 0b00000000;
+	char column = 0b00011000;
     while(1){
     //Liam's Test Code
     	SPI_SendLEDData(red, green, blue, column);
     }
+    //LIAMS TEST CODE -- END
 
     while (1) {
 
@@ -641,13 +642,18 @@ void SPI_Configuration(void){
   * @retval : None
   */
 void SPI_SendLEDData(char red, char green, char blue, char column){
+	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_12, SET);
 	SPI_SendData(SPI2,red);
+	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
 	SPI_SendData(SPI2,green);
+	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
 	SPI_SendData(SPI2,blue);
+	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
 	SPI_SendData(SPI2,column);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_12, RESET);
+	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
+	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY) == SET);
+	GPIO_SetBits(GPIOB, GPIO_Pin_12);
 }
 
 /**
@@ -658,6 +664,12 @@ void SPI_SendLEDData(char red, char green, char blue, char column){
 void delay_ms(uint32_t milli)
 {
 	uint32_t delay = milli * 17612;              // approximate loops per ms at 168 MHz, Debug config
+	for(; delay != 0; delay--);
+}
+
+void delay_us(uint32_t micro)
+{
+	uint32_t delay = micro * 18;              // approximate loops per ms at 168 MHz, Debug config
 	for(; delay != 0; delay--);
 }
 
