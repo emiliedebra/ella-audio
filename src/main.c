@@ -204,7 +204,15 @@ int main(void)
     //TODO: CHECK TEMPO
     setTempo(60);
 
-    while(1);
+
+    char red = 0b11001100;
+	char green = 0b11001100;
+	char blue = 0b11001100;
+	char column = 0b11001100;
+    while(1){
+    //Liam's Test Code
+    	SPI_SendLEDData(red, green, blue, column);
+    }
 
     while (1) {
 
@@ -294,6 +302,8 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	//init the push button
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
 
+	//SPI Config
+	SPI_Configuration();
 
 }
 
@@ -324,7 +334,7 @@ void EXTI_Configuration(void){
 	/* Interrupt mode */
 	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 	/* Triggers on rising and falling edge */
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
 	/* Add to EXTI */
 	EXTI_Init(&EXTI_InitStruct);
 
@@ -398,7 +408,7 @@ void GPIO_Configuration(void)
     GPIO_InitTypeDef GPIO_InitStruct;
 
     /* Pack the struct */
-    GPIO_InitStruct.GPIO_Speed = GPIO_Mode_AN;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_4;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -594,15 +604,23 @@ void SPI_Configuration(void){
 
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOB,&GPIO_InitStructure);
+
 	GPIO_PinAFConfig(GPIOB,GPIO_PinSource13,GPIO_AF_SPI2);
-	GPIO_PinAFConfig(GPIOB,GPIO_PinSource14,GPIO_AF_SPI2);
 	GPIO_PinAFConfig(GPIOB,GPIO_PinSource15,GPIO_AF_SPI2);
+
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB,&GPIO_InitStructure);
 
 	SPI_InitTypeDef SPI_InitStruct;
 	SPI_InitStruct.SPI_Direction = SPI_Direction_1Line_Tx;
@@ -624,12 +642,12 @@ void SPI_Configuration(void){
   */
 void SPI_SendLEDData(char red, char green, char blue, char column){
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_14, RESET);
+	GPIO_WriteBit(GPIOB, GPIO_Pin_12, SET);
 	SPI_SendData(SPI2,red);
 	SPI_SendData(SPI2,green);
 	SPI_SendData(SPI2,blue);
 	SPI_SendData(SPI2,column);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_14, SET);
+	GPIO_WriteBit(GPIOB, GPIO_Pin_12, RESET);
 }
 
 /**
