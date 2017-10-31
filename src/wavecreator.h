@@ -9,4 +9,5 @@
 /* ------ Function Prototypes ------ */
 void fillBuffer(uint32_t frequencyADDR);
 void addToBuffer(uint32_t frequencyADDR);
+void fillFlashBuffer(uint16_t frequency);
 #endif

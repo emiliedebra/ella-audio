@@ -62,7 +62,7 @@ int main(void)
     uint32_t timerFreq;
     uint16_t DMA_timerPeriod;
 
-    // programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
+    programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
 
     /* Calculate frequency of timer */
     fTimer = 10000;
@@ -76,7 +76,7 @@ int main(void)
 
     //check the tempo on the hardware and set it
     //TODO: CHECK TEMPO
-    setTempo(60);
+    setTempo(30);
 
     while (1) {
 
@@ -110,9 +110,9 @@ int main(void)
 			 	 if char at i is 1
 			 	 addToBuffer(frequency[i]);
 			   } */
-
+			// uint16_t in = ((uint16_t*)(A4_START));
 			//play the audio
-			uint8_t beat = 0b00000001;
+			uint8_t beat = 0b1010101;
 			playBeat(beat);
 			//change the tempo or volume if it needs to change
 
@@ -125,7 +125,6 @@ int main(void)
 }
 
 /* ---------- Controller Methods ---------- */
-
 /**
   * @brief  works out which notes need to be played and plays them
   * @param  uint8_t beat
@@ -133,27 +132,27 @@ int main(void)
   */
 void playBeat(uint8_t beat){
 
-	fillBuffer((uint32_t)silenceBuffer);
-
+	 fillBuffer((uint32_t)silenceBuffer);
+//	fillBuffer((uint32_t)A4_START);
 	for(int i = 0; i < 8; i++){
 		if ((beat & 0b00000001) == 0b00000001){
 			//then add this beat to the track
 			switch(i){
-				case 0: addToBuffer(A4_START);	//A4
+				case 0: addToBuffer((uint32_t)A4_START);	//A4
 						break;
-				case 1: addToBuffer(G3_START);	//G3
+				case 1: addToBuffer((uint32_t)G3_START);	//G3
 						break;
-				case 2: addToBuffer(F3_START);	//F3
+				case 2: addToBuffer((uint32_t)F3_START);	//F3
 						break;
-				case 3: addToBuffer(E3_START);	//E3
+				case 3: addToBuffer((uint32_t)E3_START);	//E3
 						break;
-				case 4: addToBuffer(D3_START);	//D3
+				case 4: addToBuffer((uint32_t)D3_START);	//D3
 						break;
-				case 5: addToBuffer(C3_START);	//C3
+				case 5: addToBuffer((uint32_t)C3_START);	//C3
 						break;
-				case 6: addToBuffer(B3_START);	//B3
+				case 6: addToBuffer((uint32_t)B3_START);	//B3
 						break;
-				case 7: addToBuffer(A3_START);	//A3
+				case 7: addToBuffer((uint32_t)A3_START);	//A3
 						break;
 				default: break;
 			}
@@ -277,7 +276,7 @@ void GPIO_Configuration(void)
     GPIO_InitTypeDef GPIO_InitStruct;
 
     /* Pack the struct */
-    GPIO_InitStruct.GPIO_Speed = GPIO_Mode_AN;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_4;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;

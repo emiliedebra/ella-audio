@@ -93,7 +93,7 @@ void programFlash() {
     (area defined by start and length) ***********/
 
   // Program A3
-  fillBuffer(frequency[0]);
+  fillFlashBuffer(frequency[0]);
   uint32_t Address = A3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -102,7 +102,7 @@ void programFlash() {
   }
 
   // Program B3
-  fillBuffer(frequency[1]);
+  fillFlashBuffer(frequency[1]);
   Address = B3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -111,7 +111,7 @@ void programFlash() {
   }
 
   // Program C3
-  fillBuffer(frequency[2]);
+  fillFlashBuffer(frequency[2]);
   Address = C3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -120,7 +120,7 @@ void programFlash() {
   }
 
   // Program D3
-  fillBuffer(frequency[3]);
+  fillFlashBuffer(frequency[3]);
   Address = D3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -129,7 +129,7 @@ void programFlash() {
   }
 
   // Program E3
-  fillBuffer(frequency[4]);
+  fillFlashBuffer(frequency[4]);
   Address = E3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -138,7 +138,7 @@ void programFlash() {
   }
 
   // Program F3
-  fillBuffer(frequency[5]);
+  fillFlashBuffer(frequency[5]);
   Address = F3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -147,7 +147,7 @@ void programFlash() {
   }
 
   // Program G3
-  fillBuffer(frequency[6]);
+  fillFlashBuffer(frequency[6]);
   Address = G3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
@@ -156,7 +156,7 @@ void programFlash() {
   }
 
   //Program A4
-  fillBuffer(frequency[7]);
+  fillFlashBuffer(frequency[7]);
   Address = A4_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
