@@ -146,37 +146,35 @@ int main(void)
 void playBeat(uint8_t beat){
 	//check each bit in the beat
 	//if it is set, then add that note to the track
-	uint8_t firstNoteFound = 0;
+
+	fillBuffer(silenceBuffer);
 
 	for(int i = 0; i < 8; i++){
 		if (beat & 0b00000001 == 0b00000001){
 			//then add this beat to the track
 			switch(i){
-				case 0: (firstNoteFound == 0) ? fillBuffer((uint16_t*)A4_START) : addToBuffer((uint16_t*)A4_START);	//A4
+				case 0: addToBuffer((uint16_t*)A4_START);	//A4
 						break;
-				case 1: (firstNoteFound == 0) ? fillBuffer((uint16_t*)G3_START) : addToBuffer((uint16_t*)G3_START);	//G3
+				case 1: addToBuffer((uint16_t*)G3_START);	//G3
 						break;
-				case 2: (firstNoteFound == 0) ? fillBuffer((uint16_t*)F3_START) : addToBuffer((uint16_t*)F3_START);	//F3
+				case 2: addToBuffer((uint16_t*)F3_START);	//F3
 						break;
-				case 3: (firstNoteFound == 0) ? fillBuffer((uint16_t*)E3_START) : addToBuffer((uint16_t*)E3_START);	//E3
+				case 3: addToBuffer((uint16_t*)E3_START);	//E3
 						break;
-				case 4: (firstNoteFound == 0) ? fillBuffer((uint16_t*)D3_START) : addToBuffer((uint16_t*)D3_START);	//D3
+				case 4: addToBuffer((uint16_t*)D3_START);	//D3
 						break;
-				case 5: (firstNoteFound == 0) ? fillBuffer((uint16_t*)C3_START) : addToBuffer((uint16_t*)C3_START);	//C3
+				case 5: addToBuffer((uint16_t*)C3_START);	//C3
 						break;
-				case 6: (firstNoteFound == 0) ? fillBuffer((uint16_t*)B3_START) : addToBuffer((uint16_t*)B3_START);	//B3
+				case 6: addToBuffer((uint16_t*)B3_START);	//B3
 						break;
-				case 7: (firstNoteFound == 0) ? fillBuffer((uint16_t*)A3_START) : addToBuffer((uint16_t*)A3_START);	//A3
+				case 7: addToBuffer((uint16_t*)A3_START);	//A3
 						break;
 				default: break;
 			}
 		}
 		beat >> 1;
 	}
-	if (firstNoteFound == 0){
-		//no notes were selected to play silence
-		fillBuffer(silenceBuffer);
-	}
+
 	//play whatever is in the AUDIOBuffer
 	DMA_ChangeBuffer(AUDIOBuffer);
 }
