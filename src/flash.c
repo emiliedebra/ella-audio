@@ -92,63 +92,63 @@ void programFlash() {
   /* Program the user Flash area half word by half word
     (area defined by start and length) ***********/
 
-  // Program A5
+  // Program A3
   fillBuffer(frequency[0]);
-  uint32_t Address = A5_START;
+  uint32_t Address = A3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
     FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
     Address = Address + 2;
   }
 
-  // Program B5
+  // Program B3
   fillBuffer(frequency[1]);
-  Address = B5_START;
+  Address = B3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
 	Address = Address + 2;
   }
 
-  // Program C5
+  // Program C3
   fillBuffer(frequency[2]);
-  Address = C5_START;
+  Address = C3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
 	Address = Address + 2;
   }
 
-  // Program D5
+  // Program D3
   fillBuffer(frequency[3]);
-  Address = D5_START;
+  Address = D3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
 	Address = Address + 2;
   }
 
-  // Program E5
+  // Program E3
   fillBuffer(frequency[4]);
-  Address = E5_START;
+  Address = E3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
 	Address = Address + 2;
   }
 
-  // Program F5
+  // Program F3
   fillBuffer(frequency[5]);
-  Address = F5_START;
+  Address = F3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
 	Address = Address + 2;
   }
 
-  // Program G5
+  // Program G3
   fillBuffer(frequency[6]);
-  Address = G5_START;
+  Address = G3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);

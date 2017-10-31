@@ -112,12 +112,23 @@ int main(void)
 			   } */
 
 			//play the audio
-			if (beatCounter == 2) {
-				DMA_ChangeBuffer((uint16_t*)C5_START);
+			if (beatCounter == 0 || beatCounter == 4 || beatCounter == 5 || beatCounter == 6) {
+				fillBuffer(E3_START);
+				addToBuffer(C3_START);
+//				addToBuffer(G5_START);
+//				DMA_ChangeBuffer(AUDIOBuffer);
+			}
+			else if (beatCounter == 1 || beatCounter == 3) {
+				fillBuffer(D3_START);
+			}
+			else if (beatCounter == 2) {
+				fillBuffer(C3_START);
 			}
 			else {
-				DMA_ChangeBuffer((uint16_t*)A4_START);
+				fillBuffer(*(uint16_t*)silenceBuffer);
+
 			}
+			DMA_ChangeBuffer(AUDIOBuffer);
 			audioPlayingFlag = 1;
 
 			//change the tempo or volume if it needs to change
