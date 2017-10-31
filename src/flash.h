@@ -21,13 +21,13 @@
 #define ADDR_FLASH_SECTOR_10    ((uint32_t)0x080C0000) /* Base @ of Sector 10, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_11    ((uint32_t)0x080E0000) /* Base @ of Sector 11, 128 Kbytes */
 
-#define A5_START				((uint32_t)0x080A0000)
-#define B5_START				((uint32_t)0x080A2710)
-#define C5_START				((uint32_t)0x080A4E20)
-#define D5_START				((uint32_t)0x080A7530)
-#define E5_START				((uint32_t)0x080A9C40)
-#define F5_START				((uint32_t)0x080AC350)
-#define G5_START				((uint32_t)0x080AEA60)
+#define A3_START				((uint32_t)0x080A0000)
+#define B3_START				((uint32_t)0x080A2710)
+#define C3_START				((uint32_t)0x080A4E20)
+#define D3_START				((uint32_t)0x080A7530)
+#define E3_START				((uint32_t)0x080A9C40)
+#define F3_START				((uint32_t)0x080AC350)
+#define G3_START				((uint32_t)0x080AEA60)
 #define A4_START				((uint32_t)0x080C0000)
 
 /* ------ Function Prototypes ------ */

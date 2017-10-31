@@ -7,6 +7,6 @@
 #include "stm32f4_discovery.h"
 #include "main.h"
 /* ------ Function Prototypes ------ */
-void fillBuffer(uint16_t frequency);
-void addToBuffer(uint16_t frequency);
+void fillBuffer(uint32_t frequencyADDR);
+void addToBuffer(uint32_t frequencyADDR);
 #endif
