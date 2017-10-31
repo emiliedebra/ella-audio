@@ -63,7 +63,7 @@ uint32_t GetSector(uint32_t Address)
 /*
  * Attempts to save a certain length buffer to the flash address given
  */
-void programFlash(uint32_t start, uint16_t * buffer, uint16_t length) {
+void programFlash() {
   /*!< At this stage the microcontroller clock setting is already configured,
        this is done through SystemInit() function which is called from startup
        file (startup_stm32f4xx.s) before to branch to application main.
@@ -80,36 +80,88 @@ void programFlash(uint32_t start, uint16_t * buffer, uint16_t length) {
   /* Clear pending flags (if any) */
   FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR |
                   FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR|FLASH_FLAG_PGSERR);
+
+//  FLASH_EraseSector(FLASH_Sector_5, VoltageRange_3);
+//  FLASH_EraseSector(FLASH_Sector_6, VoltageRange_3);
+//  FLASH_EraseSector(FLASH_Sector_7, VoltageRange_3);
+//  FLASH_EraseSector(FLASH_Sector_8, VoltageRange_3);
   FLASH_EraseSector(FLASH_Sector_9, VoltageRange_3);
   FLASH_EraseSector(FLASH_Sector_10, VoltageRange_3);
   FLASH_EraseSector(FLASH_Sector_11, VoltageRange_3);
-//  /* Get the number of the start and end sectors */
-//  uint32_t StartSector = GetSector(start);
-//  uint32_t EndSector = GetSector(start+length*2);
-//
-//  for (int i = StartSector; i < EndSector; i += 8)
-//  {
-//    /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
-//       be done by word */
-//    if (FLASH_EraseSector(i, VoltageRange_3) != FLASH_COMPLETE)
-//    {
-//      /* Error occurred while sector erase.
-//         User can add here some code to deal with this error  */
-//      while (1)
-//      {
-//      }
-//    }
-//  }
 
   /* Program the user Flash area half word by half word
     (area defined by start and length) ***********/
 
-  uint32_t Address = start;
-//  uint16_t offset = 0;
+  // Program A5
+  fillBuffer(frequency[0]);
+  uint32_t Address = A5_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-    FLASH_ProgramHalfWord(Address, buffer[i]);
+    FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
     Address = Address + 2;
+  }
+
+  // Program B5
+  fillBuffer(frequency[1]);
+  Address = B5_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
+  }
+
+  // Program C5
+  fillBuffer(frequency[2]);
+  Address = C5_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
+  }
+
+  // Program D5
+  fillBuffer(frequency[3]);
+  Address = D5_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
+  }
+
+  // Program E5
+  fillBuffer(frequency[4]);
+  Address = E5_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
+  }
+
+  // Program F5
+  fillBuffer(frequency[5]);
+  Address = F5_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
+  }
+
+  // Program G5
+  fillBuffer(frequency[6]);
+  Address = G5_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
+  }
+
+  //Program A4
+  fillBuffer(frequency[7]);
+  Address = A4_START;
+  for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+  {
+	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	Address = Address + 2;
   }
 
   /* Lock the Flash to disable the flash control register access (recommended

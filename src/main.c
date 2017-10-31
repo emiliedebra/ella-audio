@@ -62,6 +62,8 @@ int main(void)
     uint32_t timerFreq;
     uint16_t DMA_timerPeriod;
 
+    // programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
+
     /* Calculate frequency of timer */
     fTimer = 10000;
     /* Calculate Tick Rate */
@@ -80,9 +82,6 @@ int main(void)
 
     	//THIS WONT BE HERE IN THE FINAL THING
 		//===========================================================================================================
-
-    	// Uncomment when you want to actually program AUDIOBuffer to flash
-    	// programFlash(ADDR_FLASH_SECTOR_5, AUDIOBuffer, 5000);
 
     	// check for button pressed
 		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
@@ -113,7 +112,12 @@ int main(void)
 			   } */
 
 			//play the audio
-			DMA_ChangeBuffer(AUDIOBuffer);
+			if (beatCounter == 2) {
+				DMA_ChangeBuffer((uint16_t*)C5_START);
+			}
+			else {
+				DMA_ChangeBuffer((uint16_t*)A4_START);
+			}
 			audioPlayingFlag = 1;
 
 			//change the tempo or volume if it needs to change
