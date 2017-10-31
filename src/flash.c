@@ -1,4 +1,4 @@
-#include "main.h"
+#include "flash.h"
 
 /*
  * Returns sector of given address in flash
