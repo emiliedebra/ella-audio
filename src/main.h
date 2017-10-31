@@ -26,15 +26,15 @@
 typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 
 /* ----- Variables ------ */
-uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
-uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-uint8_t beatCounter = 0;
-uint8_t beatFlag = 0;
-uint8_t audioPlayingFlag = 0;
-uint8_t changeToSilenceFlag = 0;
+extern uint16_t silenceBuffer[AUDIOBUFFERSIZE];
+extern uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+extern uint8_t beatCounter;
+extern uint8_t beatFlag;
+extern uint8_t audioPlayingFlag;
+extern uint8_t changeToSilenceFlag;
 
-float frequencyScaler = 9.99E-5;
-uint16_t frequency[8] = {220, 246, 261, 293, 329, 349, 392, 440};
+extern float frequencyScaler;
+extern uint16_t frequency[8];
 
 /*----- Function Prototypes ------*/
 void RCC_Configuration(void);

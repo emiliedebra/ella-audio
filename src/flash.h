@@ -5,6 +5,7 @@
 #include "string.h"
 #include "stm32f4xx.h"
 #include "stm32f4_discovery.h"
+#include "main.h"
 
 /* ----- Macros ------ */
 #define ADDR_FLASH_SECTOR_0     ((uint32_t)0x08000000) /* Base @ of Sector 0, 16 Kbytes */
