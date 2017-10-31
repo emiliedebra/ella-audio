@@ -306,14 +306,14 @@ void EXTI_Configuration(void){
 	EXTI_InitTypeDef EXTI_InitStruct;
 
 	/* Tell system that you will use PD0 for EXTI_Line0 */
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource8);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource9);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource10);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource11);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource12);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource13);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource14);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource15);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource8);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource9);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource10);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource11);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource12);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource14);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource15);
 
 
 	/* PD0 is connected to EXTI_Line0 */
@@ -339,7 +339,7 @@ void EXTI_Configuration(void){
 void RCC_Configuration(void)
 {
     /* Enable DMA and GPIOA Clocks */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE, ENABLE);
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2, ENABLE);
@@ -355,7 +355,7 @@ void RCC_Configuration(void)
   */
 void NVIC_Configuration(void)
 {
-	//Sets up the IRQ Handler for TIMER 2
+	//Sets up the IRQ Handler for TIMER 2 - BEAT TIMER
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -363,14 +363,14 @@ void NVIC_Configuration(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    //Sets up the IRQ Handler for the DMA transfer
+    //Sets up the IRQ Handler for the DMA transfer - SENDS AUDIO TO THE DAC
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream5_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    /* Add IRQ vector to NVIC */
+    /* Add IRQ vector to NVIC */  // - SCANS FOR BUTTON PRESSES
 	/* PB 5 to 9 is connected to EXTI_Line9_5, which has EXTI9_5_IRQn vector */
     //note: everything else is set up as above so doesnt need to be changed
     NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
@@ -408,22 +408,16 @@ void GPIO_Configuration(void)
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 
-    /* Set pin PB10-15 as input for interrupts */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 |
-    						   GPIO_Pin_14 | GPIO_Pin_15;
+    /* Set pin PE8-15 as input for interrupts */
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 |
+    						   GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
     GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStruct);
+    GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-    /* Set pin PD8 and 9 as input for interrupts */
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
-    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_Init(GPIOD, &GPIO_InitStruct);
+;
 
 }
 
@@ -588,15 +582,67 @@ void DAC_Configuration(void)
 
 }
 
+/**
+  * @brief  Sets up the SPI for the LED control
+  * @param  None
+  * @retval : None
+  */
+void SPI_Configuration(void){
 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB,&GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource13,GPIO_AF_SPI2);
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource14,GPIO_AF_SPI2);
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource15,GPIO_AF_SPI2);
+
+	SPI_InitTypeDef SPI_InitStruct;
+	SPI_InitStruct.SPI_Direction = SPI_Direction_1Line_Tx;
+	SPI_InitStruct.SPI_Mode = SPI_Mode_Master;
+	SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;
+	SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;
+	SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;
+	SPI_InitStruct.SPI_NSS = SPI_NSS_Soft;
+	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+	SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
+	SPI_InitStruct.SPI_CRCPolynomial = 0;
+	SPI_Init(SPI2, &SPI_InitStruct);
+	SPI_Cmd(SPI2,ENABLE);
+}
+/**
+  * @brief  Sends data through SPI to the LEDs to control them
+  * @param  char red, char green, char blue, char column
+  * @retval : None
+  */
+void SPI_SendLEDData(char red, char green, char blue, char column){
+	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
+	GPIO_WriteBit(GPIOB, GPIO_Pin_14, RESET);
+	SPI_SendData(SPI2,red);
+	SPI_SendData(SPI2,green);
+	SPI_SendData(SPI2,blue);
+	SPI_SendData(SPI2,column);
+	GPIO_WriteBit(GPIOB, GPIO_Pin_14, SET);
+}
+
+/**
+  * @brief  Delays by some ammount. Should only be used for debouncing
+  * @param  uint32_t milli
+  * @retval : None
+  */
 void delay_ms(uint32_t milli)
 {
 	uint32_t delay = milli * 17612;              // approximate loops per ms at 168 MHz, Debug config
 	for(; delay != 0; delay--);
 }
 
-
-//These have to be here for some reason. I deleted them and then it wouldnt build :C
 
 /*
  * Callback used by stm32f4_discovery_audio_codec.c.

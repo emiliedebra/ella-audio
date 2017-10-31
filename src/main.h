@@ -40,6 +40,8 @@ void setTempo(uint16_t bpm);
 void fillBuffer(uint16_t frequency);
 void addToBuffer(uint16_t frequency);
 void EXTI_Configuration(void);
+void SPI_Configuration(void);
+void SPI_SendLEDData(char red, char green, char blue, char column);
 
 
 #endif /* MAIN_H_ */
