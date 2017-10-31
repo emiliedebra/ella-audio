@@ -76,6 +76,102 @@ void DMA1_Stream5_IRQHandler(void){
 }
 
 
+/*******************************************************************************
+* Function Name  : EXTI9_5_IRQHandler
+* Description    : Handles the interrupt from PD5-9
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void EXTI9_5_IRQHandler(void) {
+    /* Make sure that interrupt flag is set */
+    if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
+        /* Do your stuff when PB12 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line8);
+    }
+    /* Make sure that interrupt flag is set */
+    else if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
+        /* Do your stuff when PB12 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line9);
+    }
+}
+
+/*******************************************************************************
+* Function Name  : EXTI15_10_IRQHandler
+* Description    : Handles the interrupt from PD10-15
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void EXTI15_10_IRQHandler(void) {
+    /* Make sure that interrupt flag is set */
+    if (EXTI_GetITStatus(EXTI_Line10) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line10);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line11) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line11);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line12) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line12);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line13) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line13);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line14) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line14);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line15) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line15);
+    }
+}
+
+
 /**
 **===========================================================================
 **
@@ -107,6 +203,8 @@ int main(void)
     //check the tempo on the hardware and set it
     //TODO: CHECK TEMPO
     setTempo(60);
+
+    while(1);
 
     while (1) {
 
@@ -153,6 +251,9 @@ int main(void)
 		}
     }
 }
+
+
+
 /**
  * Sets up all the peripherals and background shit on the micro.
  * Sets up the clocks, NVIC, GPIO pins (pins for audio out, LEDS and Push Button),
@@ -172,11 +273,14 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	/* System Clocks Configuration */
 	RCC_Configuration();
 
-	/* NVIC configuration */
-	NVIC_Configuration();
-
 	/* Configure the GPIO ports */
 	GPIO_Configuration();
+
+	//set up the external interrupts
+	EXTI_Configuration();
+
+	/* NVIC configuration */
+	NVIC_Configuration();
 
 	/* Timer Configuration */
 	Timer_Configuration( DMA_timerPeriod, TIMER6_PRESCALER);
@@ -189,6 +293,41 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 
 	//init the push button
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
+
+
+}
+
+/**
+  * @brief  Sets up the pins PD8-15 as external interrupts
+  * @param  None
+  * @retval : None
+  */
+void EXTI_Configuration(void){
+	EXTI_InitTypeDef EXTI_InitStruct;
+
+	/* Tell system that you will use PD0 for EXTI_Line0 */
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource8);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD, EXTI_PinSource9);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource10);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource11);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource12);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource14);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource15);
+
+
+	/* PD0 is connected to EXTI_Line0 */
+	EXTI_InitStruct.EXTI_Line = EXTI_Line8 | EXTI_Line9 | EXTI_Line10 | EXTI_Line11 |
+								EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15;
+	/* Enable interrupt */
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	/* Interrupt mode */
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	/* Triggers on rising and falling edge */
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+	/* Add to EXTI */
+	EXTI_Init(&EXTI_InitStruct);
+
 }
 
 
@@ -200,10 +339,13 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 void RCC_Configuration(void)
 {
     /* Enable DMA and GPIOA Clocks */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD, ENABLE);
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2, ENABLE);
+
+    /* Enable clock for SYSCFG */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 }
 
 /**
@@ -227,6 +369,19 @@ void NVIC_Configuration(void)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+
+    /* Add IRQ vector to NVIC */
+	/* PB 5 to 9 is connected to EXTI_Line9_5, which has EXTI9_5_IRQn vector */
+    //note: everything else is set up as above so doesnt need to be changed
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+	/* Add to NVIC */
+	NVIC_Init(&NVIC_InitStructure);
+
+	/* PB 10 to 15 is connected to EXTI_Line15_10, which has EXTI19_10_IRQn vector */
+    //note: everything else is set up as above so doesnt need to be changed
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
+	/* Add to NVIC */
+	NVIC_Init(&NVIC_InitStructure);
 
 }
 
@@ -252,6 +407,24 @@ void GPIO_Configuration(void)
     /* Call Init function */
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+
+    /* Set pin PB10-15 as input for interrupts */
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 |
+    						   GPIO_Pin_14 | GPIO_Pin_15;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* Set pin PD8 and 9 as input for interrupts */
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(GPIOD, &GPIO_InitStruct);
+
 }
 
 /**
@@ -276,19 +449,19 @@ void fillBuffer(uint16_t frequency) {
 void addToBuffer(uint16_t frequency) {
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		float fourthousand = n/(double)4000;
-		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(foruthousand, 2));
-
-		// if both sounds are quiet
-		if (val < 1023 && AUDIOBuffer[n] < 1023) {
-			uint16_t newVal = (uint16_t)((AUDIOBuffer[n]*val)/(double)(1023.5));
-			AUDIOBuffer[n] = newVal;
-		}
-		// if both either sound is fairly loud
-		else {
-			uint16_t newVal = (uint16_t)(2*(AUDIOBuffer[n] + val) - (AUDIOBuffer[n] * val)/(double)(1023.5) - 2047);
-			AUDIOBuffer[n] = newVal;
-		}
+//		float fourthousand = n/(double)4000;
+//		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(foruthousand, 2));
+//
+//		// if both sounds are quiet
+//		if (val < 1023 && AUDIOBuffer[n] < 1023) {
+//			uint16_t newVal = (uint16_t)((AUDIOBuffer[n]*val)/(double)(1023.5));
+//			AUDIOBuffer[n] = newVal;
+//		}
+//		// if both either sound is fairly loud
+//		else {
+//			uint16_t newVal = (uint16_t)(2*(AUDIOBuffer[n] + val) - (AUDIOBuffer[n] * val)/(double)(1023.5) - 2047);
+//			AUDIOBuffer[n] = newVal;
+//		}
 	}
 }
 /**

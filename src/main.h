@@ -39,5 +39,7 @@ void Controller_Setup(uint16_t DMA_timerPeriod);
 void setTempo(uint16_t bpm);
 void fillBuffer(uint16_t frequency);
 void addToBuffer(uint16_t frequency);
+void EXTI_Configuration(void);
+
 
 #endif /* MAIN_H_ */
