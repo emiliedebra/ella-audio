@@ -112,25 +112,8 @@ int main(void)
 			   } */
 
 			//play the audio
-			if (beatCounter == 0 || beatCounter == 4 || beatCounter == 5 || beatCounter == 6) {
-				fillBuffer(E3_START);
-				addToBuffer(C3_START);
-//				addToBuffer(G5_START);
-//				DMA_ChangeBuffer(AUDIOBuffer);
-			}
-			else if (beatCounter == 1 || beatCounter == 3) {
-				fillBuffer(D3_START);
-			}
-			else if (beatCounter == 2) {
-				fillBuffer(C3_START);
-			}
-			else {
-				fillBuffer(*(uint16_t*)silenceBuffer);
-
-			}
-			DMA_ChangeBuffer(AUDIOBuffer);
-			audioPlayingFlag = 1;
-
+			uint8_t beat = 0b00000001;
+			playBeat(beat);
 			//change the tempo or volume if it needs to change
 
 			//update the beat counter and beat flag
@@ -143,40 +126,44 @@ int main(void)
 
 /* ---------- Controller Methods ---------- */
 
+/**
+  * @brief  works out which notes need to be played and plays them
+  * @param  uint8_t beat
+  * @retval : None
+  */
 void playBeat(uint8_t beat){
-	//check each bit in the beat
-	//if it is set, then add that note to the track
 
-	fillBuffer(silenceBuffer);
+	fillBuffer((uint32_t)silenceBuffer);
 
 	for(int i = 0; i < 8; i++){
-		if (beat & 0b00000001 == 0b00000001){
+		if ((beat & 0b00000001) == 0b00000001){
 			//then add this beat to the track
 			switch(i){
-				case 0: addToBuffer((uint16_t*)A4_START);	//A4
+				case 0: addToBuffer(A4_START);	//A4
 						break;
-				case 1: addToBuffer((uint16_t*)G3_START);	//G3
+				case 1: addToBuffer(G3_START);	//G3
 						break;
-				case 2: addToBuffer((uint16_t*)F3_START);	//F3
+				case 2: addToBuffer(F3_START);	//F3
 						break;
-				case 3: addToBuffer((uint16_t*)E3_START);	//E3
+				case 3: addToBuffer(E3_START);	//E3
 						break;
-				case 4: addToBuffer((uint16_t*)D3_START);	//D3
+				case 4: addToBuffer(D3_START);	//D3
 						break;
-				case 5: addToBuffer((uint16_t*)C3_START);	//C3
+				case 5: addToBuffer(C3_START);	//C3
 						break;
-				case 6: addToBuffer((uint16_t*)B3_START);	//B3
+				case 6: addToBuffer(B3_START);	//B3
 						break;
-				case 7: addToBuffer((uint16_t*)A3_START);	//A3
+				case 7: addToBuffer(A3_START);	//A3
 						break;
 				default: break;
 			}
 		}
-		beat >> 1;
+		beat = beat >> 1;
 	}
 
 	//play whatever is in the AUDIOBuffer
 	DMA_ChangeBuffer(AUDIOBuffer);
+	audioPlayingFlag = 1;
 }
 
 /**

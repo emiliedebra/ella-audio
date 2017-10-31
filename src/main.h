@@ -48,5 +48,6 @@ void DAC_Configuration(void);
 void delay_ms(uint32_t milli);
 void Controller_Setup(uint16_t DMA_timerPeriod);
 void setTempo(uint16_t bpm);
+void playBeat(uint8_t beat);
 
 #endif /* MAIN_H_ */
