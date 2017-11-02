@@ -21,6 +21,7 @@
 #define ADDR_FLASH_SECTOR_10    ((uint32_t)0x080C0000) /* Base @ of Sector 10, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_11    ((uint32_t)0x080E0000) /* Base @ of Sector 11, 128 Kbytes */
 
+/**** PIANO MACROS ****/
 #define A3_START				((uint32_t)0x080A0000)
 #define B3_START				((uint32_t)0x080A2710)
 #define C3_START				((uint32_t)0x080A4E20)
@@ -30,7 +31,19 @@
 #define G3_START				((uint32_t)0x080AEA60)
 #define A4_START				((uint32_t)0x080C0000)
 
+/**** DRUM MACROS ****/
+#define KICK_START				((uint32_t)0x080C2710)
+#define FLOORTOM_START			((uint32_t)0x080C4E20)
+#define HITOM_START				((uint32_t)0x080C7530)
+#define CHIHAT1_START			((uint32_t)0x080C9C40)
+#define CHIHAT2_START			((uint32_t)0x080CC350)
+#define OHIHAT_START			((uint32_t)0x080CEA60)
+#define SNARE_START				((uint32_t)0x080E0000)
+#define CRASH_START				((uint32_t)0x080E2710)
+
+
 /* ------ Function Prototypes ------ */
 uint32_t GetSector(uint32_t Address);
+uint32_t getDrumAddress(int i);
 void programFlash();
 #endif

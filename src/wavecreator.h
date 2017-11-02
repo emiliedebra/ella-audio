@@ -7,7 +7,12 @@
 #include "stm32f4_discovery.h"
 #include "main.h"
 /* ------ Function Prototypes ------ */
-void fillBuffer(uint32_t frequencyADDR);
-void addToBuffer(uint32_t frequencyADDR);
+
 void fillFlashBuffer(uint16_t frequency);
+void createDrumSynth(uint16_t frequency);
+void fillPianoBuffer(uint32_t frequencyADDR);
+void fillDrumBuffer(uint32_t frequencyADDR);
+void addToPianoBuffer(uint32_t frequencyADDR);
+void addToDrumBuffer(uint32_t frequencyADDR);
+
 #endif
