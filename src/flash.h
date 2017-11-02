@@ -30,7 +30,18 @@
 #define G3_START				((uint32_t)0x080AEA60)
 #define A4_START				((uint32_t)0x080C0000)
 
+#define KICK_START				((uint32_t)0x080C2710)
+#define FLOORTOM_START			((uint32_t)0x080C4E20)
+#define HITOM_START				((uint32_t)0x080C7530)
+#define CHIHAT1_START			((uint32_t)0x080C9C40)
+#define CHIHAT2_START			((uint32_t)0x080CC350)
+#define OHIHAT_START			((uint32_t)0x080CEA60)
+#define SNARE_START				((uint32_t)0x080E0000)
+#define CRASH_START				((uint32_t)0x080E2710)
+
+
 /* ------ Function Prototypes ------ */
 uint32_t GetSector(uint32_t Address);
 void programFlash();
+uint32_t getDrumAddress(int i);
 #endif

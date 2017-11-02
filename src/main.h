@@ -28,6 +28,7 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 /* ----- Variables ------ */
 extern uint16_t silenceBuffer[AUDIOBUFFERSIZE];
 extern uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+extern uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint8_t beatCounter;
 extern uint8_t beatFlag;
 extern uint8_t audioPlayingFlag;
@@ -48,6 +49,7 @@ void DAC_Configuration(void);
 void delay_ms(uint32_t milli);
 void Controller_Setup(uint16_t DMA_timerPeriod);
 void setTempo(uint16_t bpm);
-void playBeat(uint8_t beat);
+void playPianoBeat(uint8_t beat);
+void playDrumBeat(uint8_t beat);
 
 #endif /* MAIN_H_ */

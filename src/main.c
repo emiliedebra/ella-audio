@@ -4,6 +4,7 @@
 /* -------- Variables -------- */
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
 uint8_t audioPlayingFlag = 0;
@@ -62,7 +63,7 @@ int main(void)
     uint32_t timerFreq;
     uint16_t DMA_timerPeriod;
 
-    programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
+    // programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
 
     /* Calculate frequency of timer */
     fTimer = 10000;
@@ -112,8 +113,8 @@ int main(void)
 			   } */
 			// uint16_t in = ((uint16_t*)(A4_START));
 			//play the audio
-			uint8_t beat = 0b1010101;
-			playBeat(beat);
+			DMA_ChangeBuffer((uint16_t*)SNARE_START);
+			audioPlayingFlag = 1;
 			//change the tempo or volume if it needs to change
 
 			//update the beat counter and beat flag
@@ -130,7 +131,7 @@ int main(void)
   * @param  uint8_t beat
   * @retval : None
   */
-void playBeat(uint8_t beat){
+void playPianoBeat(uint8_t beat){
 
 	 fillBuffer((uint32_t)silenceBuffer);
 //	fillBuffer((uint32_t)A4_START);
@@ -160,6 +161,39 @@ void playBeat(uint8_t beat){
 		beat = beat >> 1;
 	}
 
+	//play whatever is in the AUDIOBuffer
+	DMA_ChangeBuffer(AUDIOBuffer);
+	audioPlayingFlag = 1;
+}
+
+void playDrumBeat(uint8_t beat){
+
+	fillBuffer((uint32_t)silenceBuffer);
+	for(int i = 0; i < 8; i++){
+		if ((beat & 0b00000001) == 0b00000001){
+			//then add this beat to the track
+			switch(i){
+			case 0: addToBuffer((uint32_t)KICK_START);	//A4
+					break;
+			case 1: addToBuffer((uint32_t)SNARE_START);	//G3
+					break;
+			case 2: addToBuffer((uint32_t)FLOORTOM_START);	//F3
+					break;
+			case 3: addToBuffer((uint32_t)HITOM_START);	//E3
+					break;
+			case 4: addToBuffer((uint32_t)CHIHAT1_START);	//D3
+					break;
+			case 5: addToBuffer((uint32_t)CHIHAT2_START);	//C3
+					break;
+			case 6: addToBuffer((uint32_t)OHIHAT_START);	//B3
+					break;
+			case 7: addToBuffer((uint32_t)CRASH_START);	//A3
+					break;
+			default: break;
+}
+		}
+		beat = beat >> 1;
+	}
 	//play whatever is in the AUDIOBuffer
 	DMA_ChangeBuffer(AUDIOBuffer);
 	audioPlayingFlag = 1;

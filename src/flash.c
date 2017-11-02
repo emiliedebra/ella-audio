@@ -1,5 +1,29 @@
 #include "flash.h"
 
+uint32_t getDrumAddress(int i) {
+	if (i == 0) {
+		return KICK_START;
+	}
+	else if (i == 1) {
+		return FLOORTOM_START;
+	}
+	else if (i == 2) {
+		return HITOM_START;
+	}
+	else if (i == 3) {
+		return CHIHAT1_START;
+	}
+	else if (i == 4) {
+		return CHIHAT2_START;
+	}
+	else if (i == 5) {
+		return OHIHAT_START;
+	}
+	else if (i == 6) {
+		return SNARE_START;
+	}
+	return CRASH_START;
+}
 /*
  * Returns sector of given address in flash
  */
@@ -162,6 +186,16 @@ void programFlash() {
   {
 	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
 	Address = Address + 2;
+  }
+
+  // Save Drum Sounds to Flash
+  for (int i = 0; i < 8; i++) {
+	  createDrumSynth(i);
+	  Address = (uint32_t)getDrumAddress(i);
+	  for (int j = 0; j < AUDIOBUFFERSIZE; j++) {
+		  FLASH_ProgramHalfWord(Address, DRUMBuffer[j]);
+		  Address += 2;
+	  }
   }
 
   /* Lock the Flash to disable the flash control register access (recommended
