@@ -76,45 +76,15 @@ int main(void)
 
     //check the tempo on the hardware and set it
     //TODO: CHECK TEMPO
-    setTempo(30);
+    setTempo(120);
 
     while (1) {
-
-    	//THIS WONT BE HERE IN THE FINAL THING
-		//===========================================================================================================
-
-    	// check for button pressed
-		if (STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET) {
-			/* Debounce */
-			while(STM_EVAL_PBGetState(BUTTON_USER) == Bit_SET);
-
-			// fill buffer with one of the notes (for testing purposes)
-			fillBuffer(frequency[beatCounter]);
-			if(audioPlayingFlag != 1){
-				DMA_ChangeBuffer(AUDIOBuffer);
-				audioPlayingFlag = 1;
-			}
-		}
-		/* Debounce */
-		delay_ms(1);
-		//===========================================================================================================
 
 		//handles the playing of a beat
 		if(beatFlag == 1){
 
-			// TODO: get the note array from hardware
-
-			// TODO: compute array for the audio to be played
-			/* fillBuffer(frequency[0]); // fill buffer with first note
-			   for (int i = 1; i < 8; i++) {
-			 	 if char at i is 1
-			 	 addToBuffer(frequency[i]);
-			   } */
-			// uint16_t in = ((uint16_t*)(A4_START));
 			//play the audio
-			uint8_t beat = 0b1010101;
-			playBeat(beat);
-			//change the tempo or volume if it needs to change
+			playBeat(getBeat(beatCounter));
 
 			//update the beat counter and beat flag
 			beatCounter++;
@@ -125,6 +95,44 @@ int main(void)
 }
 
 /* ---------- Controller Methods ---------- */
+
+/**
+  * @brief  gets the buttons that have been pushed for this beat
+  * @param  uint8_t beat
+  * @retval : None
+  */
+uint8_t getBeat(uint8_t beat){
+	uint8_t result = 0;
+
+	if(beat == 0){
+		result = 0b00010101;
+	}
+	else if (beat == 1){
+		result = 0b00101010;
+	}
+	else if (beat == 2){
+		result = 0b00001010;
+	}
+	else if (beat == 3){
+		result = 0b00010000;
+	}
+	else if (beat == 4){
+		result = 0b00010100;
+	}
+	else if (beat == 5){
+		result = 0b00001010;
+	}
+	else if (beat == 6){
+		result = 0b00000000;
+	}
+	else if (beat == 7){
+		result = 0b00010101;
+	}
+
+
+	return result;
+}
+
 /**
   * @brief  works out which notes need to be played and plays them
   * @param  uint8_t beat

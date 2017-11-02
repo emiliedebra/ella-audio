@@ -18,7 +18,7 @@
 #include "wavecreator.h"
 
 /* ----- Macros ------*/
-#define AUDIOBUFFERSIZE         5000
+#define AUDIOBUFFERSIZE         4500
 #define WAVEFREQ            	880 	/* 880Hz --> A5 */
 #define TIMER6_PRESCALER    	2     	/* produces a 42MHz tick */
 #define TIMER_CLOCK           	84E6 	/* TIM6 runs at 84MHz */
@@ -49,5 +49,6 @@ void delay_ms(uint32_t milli);
 void Controller_Setup(uint16_t DMA_timerPeriod);
 void setTempo(uint16_t bpm);
 void playBeat(uint8_t beat);
+uint8_t getBeat(uint8_t beat);
 
 #endif /* MAIN_H_ */
