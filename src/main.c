@@ -84,517 +84,6 @@ void DMA1_Stream5_IRQHandler(void){
 	}
 }
 
-/*******************************************************************************
-* Function Name  : EXTI9_5_IRQHandler
-* Description    : Handles the interrupt from PD5-9
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void EXTI9_5_IRQHandler(void) {
-    /* Make sure that interrupt flag is set */
-    if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
-    	//column 0 is triggered
-
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED3);
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		//pianoOneArray[0] = pianoOneArray[0] ^ 0b10000000;
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00000001;
-    	}
-    	delay_ms(10);
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00000010;
-    	}
-    	delay_ms(10);
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00000100;
-    	}
-    	delay_ms(10);
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00001000;
-    	}
-    	delay_ms(10);
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00010000;
-    	}
-    	delay_ms(10);
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00100000;
-    	}
-    	delay_ms(10);
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b01000000;
-    	}
-    	delay_ms(10);
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
-    		pianoOneArray[0] = pianoOneArray[0] ^ 0b10000000;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line8);
-    }
-    /* Make sure that interrupt flag is set */
-    else if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
-    	//column 1 is triggered
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
-    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line9);
-    }
-}
-
-/*******************************************************************************
-* Function Name  : EXTI15_10_IRQHandler
-* Description    : Handles the interrupt from PD10-15
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void EXTI15_10_IRQHandler(void) {
-    /* Make sure that interrupt flag is set */
-    if (EXTI_GetITStatus(EXTI_Line10) == SET) {
-    	//column 2 is triggered
-
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
-    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line10);
-    }
-    else if (EXTI_GetITStatus(EXTI_Line11) == SET) {
-    	//column 3 is triggered
-
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
-    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line11);
-    }
-    else if (EXTI_GetITStatus(EXTI_Line12) == SET) {
-    	//column 4 is triggered
-
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
-    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line12);
-    }
-    else if (EXTI_GetITStatus(EXTI_Line13) == SET) {
-    	//column 5 is triggered
-
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
-    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line13);
-    }
-    else if (EXTI_GetITStatus(EXTI_Line14) == SET) {
-    	//column 6 is triggered
-
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
-    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line14);
-    }
-    else if (EXTI_GetITStatus(EXTI_Line15) == SET) {
-    	//column 7 is triggered
-
-
-    	//check row 0
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b10000000;
-    	}
-
-    	//check row 1
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b01000000;
-    	}
-    	//check row 2
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00100000;
-    	}
-    	//check row 3
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00010000;
-    	}
-    	//check row 4
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00001000;
-    	}
-    	//check row 5
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00000100;
-    	}
-    	//check row 6
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00000010;
-    	}
-    	//check row 7
-    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
-    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
-    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
-    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00000001;
-    	}
-
-    	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
-    			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
-
-        /* Clear interrupt flag */
-        EXTI_ClearITPendingBit(EXTI_Line15);
-    }
-}
 /**
 **===========================================================================
 **
@@ -621,7 +110,7 @@ int main(void)
     Controller_Setup(DMA_timerPeriod);
 
     //check the tempo on the hardware and set it to initial value
-    setTempo(110);
+    setTempo(60);
 
     while (1) {
 		// check for play or pause pressed
@@ -645,9 +134,10 @@ int main(void)
 			}
 			else {
 				SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
+				STM_EVAL_LEDToggle(LED5);
 			}
 			updateLEDs = 0;
-
+			checkButtons();
     	}
     	if(beatFlag == 1) {
 			// play the audio
@@ -665,6 +155,22 @@ int main(void)
 		}
 
     }
+}
+
+void checkButtons(){
+	for(uint8_t row = 0; row<8; row++){
+		//check row
+		GPIO_ResetBits(GPIOE, 0b11111111); // reset all bits
+		GPIO_SetBits(GPIOE, (1<<row)); // set current row enabled
+		for(uint8_t col = 8; col<16; col++){
+			if(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET){
+				while(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET);
+				pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
+				delay_ms(1);
+			}
+		}
+
+	}
 }
 
 /* ---------- Controller Methods ---------- */
@@ -852,8 +358,6 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	/* Configure the GPIO ports */
 	GPIO_Configuration();
 
-	/* set up the external interrupts */
-	EXTI_Configuration();
 
 	/* NVIC configuration */
 	NVIC_Configuration();
@@ -875,38 +379,6 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 }
 
 /**
-  * @brief  Sets up the pins PD8-15 as external interrupts
-  * @param  None
-  * @retval : None
-  */
-void EXTI_Configuration(void){
-	EXTI_InitTypeDef EXTI_InitStruct;
-
-	/* Tell system that you will use PD0 for EXTI_Line0 */
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource8);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource9);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource10);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource11);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource12);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource13);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource14);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource15);
-
-
-	/* PD0 is connected to EXTI_Line0 */
-	EXTI_InitStruct.EXTI_Line = EXTI_Line8 | EXTI_Line9 | EXTI_Line10 | EXTI_Line11 |
-								EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15;
-	/* Enable interrupt */
-	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
-	/* Interrupt mode */
-	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-	/* Triggers on rising and falling edge */
-	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
-	/* Add to EXTI */
-	EXTI_Init(&EXTI_InitStruct);
-
-}
-/**
   * @brief  Configures the different system clocks.
   * @param  None
   * @retval : None
@@ -918,9 +390,6 @@ void RCC_Configuration(void)
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3, ENABLE);
-
-    /* Enable clock for SYSCFG */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 }
 
@@ -953,24 +422,6 @@ void NVIC_Configuration(void)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-
-    /* Add IRQ vector to NVIC */  // - SCANS FOR BUTTON PRESSES
-	/* PB 5 to 9 is connected to EXTI_Line9_5, which has EXTI9_5_IRQn vector */
-	//note: everything else is set up as above so doesnt need to be changed
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-	/* Add to NVIC */
-	NVIC_Init(&NVIC_InitStructure);
-
-	/* PB 10 to 15 is connected to EXTI_Line15_10, which has EXTI19_10_IRQn vector */
-	//note: everything else is set up as above so doesnt need to be changed
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-	/* Add to NVIC */
-	NVIC_Init(&NVIC_InitStructure);
-
 }
 
 
@@ -1064,7 +515,7 @@ void GPIO_Configuration(void)
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 
@@ -1074,7 +525,7 @@ void GPIO_Configuration(void)
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 	//set these pins high
@@ -1157,7 +608,7 @@ void Timer_Configuration(uint16_t wavPeriod, uint16_t preScaler)
     TIM_Cmd(TIM2, ENABLE);
 
     /* TIM3 Set Up */
-	TIM_TimeBaseStruct.TIM_Period = 100-1;
+	TIM_TimeBaseStruct.TIM_Period = 50-1;
 	TIM_TimeBaseStruct.TIM_Prescaler = 1000-1;
 
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStruct);

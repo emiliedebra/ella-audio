@@ -59,6 +59,7 @@ void addPianoTwoBeat(uint8_t beat);
 void play(void);
 void pause(void);
 void resume(void);
+void checkButtons(void);
 
 void EXTI_Configuration(void);
 void SPI_Configuration(void);
