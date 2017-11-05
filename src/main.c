@@ -6,7 +6,6 @@ uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-extern unsigned char violin_g3[];
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
 uint8_t audioPlayingFlag = 0;
