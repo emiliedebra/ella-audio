@@ -465,7 +465,38 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
 }
 
+/**
+  * @brief  Sets up the pins PD8-15 as external interrupts
+  * @param  None
+  * @retval : None
+  */
+void EXTI_Configuration(void){
+	EXTI_InitTypeDef EXTI_InitStruct;
 
+	/* Tell system that you will use PD0 for EXTI_Line0 */
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource8);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource9);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource10);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource11);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource12);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource14);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE, EXTI_PinSource15);
+
+
+	/* PD0 is connected to EXTI_Line0 */
+	EXTI_InitStruct.EXTI_Line = EXTI_Line8 | EXTI_Line9 | EXTI_Line10 | EXTI_Line11 |
+								EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15;
+	/* Enable interrupt */
+	EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+	/* Interrupt mode */
+	EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+	/* Triggers on rising and falling edge */
+	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+	/* Add to EXTI */
+	EXTI_Init(&EXTI_InitStruct);
+
+}
 /**
   * @brief  Configures the different system clocks.
   * @param  None
