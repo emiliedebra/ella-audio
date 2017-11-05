@@ -6,7 +6,7 @@ uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t PIANOONEBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-
+uint32_t ADC1ConvertedValue[2] = {0};
 // hardcoded here for now
 //uint8_t pianoOneArray[8] = {0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001};
 //uint8_t pianoTwoArray[8] = {0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001};
@@ -21,6 +21,7 @@ uint8_t beatFlag = 0;
 uint8_t updateLEDs = 0;
 uint8_t audioPlayingFlag = 0;
 uint8_t ledOnCol = 0;
+uint8_t instrument = 0;
 
 enum pauseResume { PAUSE = 0, RESUME = 1 };
 uint8_t pauseResumeStatus = PAUSE;
@@ -110,7 +111,7 @@ int main(void)
     Controller_Setup(DMA_timerPeriod);
 
     //check the tempo on the hardware and set it to initial value
-    setTempo(60);
+    setTempo(110);
 
     while (1) {
 		// check for play or pause pressed
@@ -128,32 +129,65 @@ int main(void)
 			/* Debounce */
 			delay_ms(1);
     	}
+
+    	// check for instrument press
+    	if (1) {
+    		instrument = 0;
+    	}
+
+    	// update the LEDs
     	if (updateLEDs == 1) {
 			if (ledOnCol != beatCounter) {
-				SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+				if (instrument == 0) {
+					SPI_SendLEDData(0x0, 0x0, drumArray[ledOnCol], ledOnCol);
+				}
+				else if (instrument == 1) {
+					SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+				}
+				else if (instrument == 2) {
+					SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+				}
 			}
 			else {
-				SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
+				uint8_t LEDbeat = 0;
+				if (beatCounter == 0) {
+					LEDbeat = 7;
+				}
+				else {
+					LEDbeat = beatCounter - 1;
+				}
+
+
+				if (instrument == 0) {
+					SPI_SendLEDData(getDrumBeat(LEDbeat), ~getDrumBeat(LEDbeat), 0x0, LEDbeat);
+				}
+				else if (instrument == 1) {
+					SPI_SendLEDData(getPianoOneBeat(LEDbeat), ~getPianoOneBeat(LEDbeat), 0x0, LEDbeat);
+				}
+				else if (instrument == 2) {
+					SPI_SendLEDData(getPianoTwoBeat(LEDbeat), ~getPianoTwoBeat(LEDbeat), 0x0, LEDbeat);
+				}
 				STM_EVAL_LEDToggle(LED5);
 			}
 			updateLEDs = 0;
 			checkButtons();
+			// setTempo(getTempo());
+			setInstrument();
     	}
-    	if(beatFlag == 1) {
+
+    	// play the audio
+		if(beatFlag == 1) {
 			// play the audio
 			addDrumBeat(getDrumBeat(beatCounter));
 			addPianoOneBeat(getPianoOneBeat(beatCounter));
 			addPianoTwoBeat(getPianoTwoBeat(beatCounter));
 			// TODO: change the tempo or volume if it needs to change
 			play();
-
-			// send instrument one led info
 			//update the beat counter and beat flag
 			beatCounter++;
 			if(beatCounter>=8) beatCounter = 0;
 			beatFlag = 0;
 		}
-
     }
 }
 
@@ -165,11 +199,21 @@ void checkButtons(){
 		for(uint8_t col = 8; col<16; col++){
 			if(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET){
 				while(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET);
-				pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
+				// if drum selected
+				if (instrument == 0) {
+					drumArray[col-8] = drumArray[col-8] ^ (0b10000000>>row);
+				}
+				// else if piano one selected
+				else if (instrument == 1) {
+					pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
+				}
+				// else if piano two selected
+				else if (instrument == 2) {
+					pianoTwoArray[col-8] = pianoTwoArray[col-8] ^ (0b10000000>>row);
+				}
 				delay_ms(1);
 			}
 		}
-
 	}
 }
 
@@ -299,6 +343,11 @@ void addDrumBeat(uint8_t beat){
 void play() {
 	addToDrumBuffer((uint32_t)PIANOONEBuffer);
 	addToDrumBuffer((uint32_t)PIANOTWOBuffer);
+	// get Volume
+//	float volume = getVolume();
+//	for (int i = 0; i < AUDIOBUFFERSIZE; i++) {
+//		DRUMBuffer[i] = volume*DRUMBuffer[i];
+//	}
 	DMA_ChangeBuffer(DRUMBuffer);
 	audioPlayingFlag = 1;
 }
@@ -313,6 +362,14 @@ void pause() {
 void resume() {
 	TIM_Cmd(TIM2, ENABLE);
 	pauseResumeStatus = RESUME;
+}
+
+float getVolume() {
+	return ADC1ConvertedValue[1];
+}
+
+uint8_t getTempo() {
+	return ADC1ConvertedValue[0];
 }
 
 /**
@@ -333,6 +390,15 @@ void setTempo(uint16_t bpm){
 void DMA_ChangeBuffer(uint16_t *waveBuffer){
 	DMA_Cmd(DMA1_Stream5, DISABLE);
 	DMA_Configuration(waveBuffer);
+}
+
+void setInstrument() {
+	for(uint8_t button = 12; button<16; button++){
+		if(GPIO_ReadInputDataBit(GPIOD, (1<<button)) == Bit_SET){
+			while(GPIO_ReadInputDataBit(GPIOD, (1<<button)) == Bit_SET);
+			instrument = button-12;
+		}
+	}
 }
 
 /* ------------ Configuration Methods ----------- */
@@ -532,6 +598,40 @@ void GPIO_Configuration(void)
 	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
 			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
 
+	// Pins for Volume and Tempo
+//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;// PC0, PC1
+//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN; //The pins are configured in analog mode
+//	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL ; //We don't need any pull up or pull down
+//	GPIO_Init(GPIOC, &GPIO_InitStruct); //Initialize GPIOC pins with the configuration
+//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1; //PA1
+//	GPIO_Init(GPIOA, &GPIO_InitStruct); //Initialize GPIOA pins with the configuration
+//
+//	// output LEDs for instrument
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_15 ;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	//set these pins high
+	GPIO_SetBits(GPIOA,  GPIO_Pin_10 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_15);
+
+	// Pins for input buttons play/pause
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+	// Pins for input buttons instruments
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOD, &GPIO_InitStruct);
 }
 
 /**
@@ -572,6 +672,24 @@ void DMA_Configuration(uint16_t * waveBuffer)
     /* Enable DMA */
     DMA_Cmd(DMA1_Stream5, ENABLE);
 
+//    // Channel 0 Stream 0 init (for ADC)
+//    DMA_InitStructure.DMA_Channel = DMA_Channel_2;
+//	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;//ADC3's data register
+//	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&ADC1ConvertedValue;
+//	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+//	DMA_InitStructure.DMA_BufferSize = 2;
+//	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+//	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+//	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;//Reads 16 bit values
+//	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;//Stores 16 bit values
+//	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+//	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+//	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+//	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
+//	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+//	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+//	DMA_Init(DMA2_Stream0, &DMA_InitStructure);
+//	DMA_Cmd(DMA2_Stream0, ENABLE);
 }
 
 /**
@@ -642,6 +760,45 @@ void DAC_Configuration(void)
 
     /* Enable DAC Channel1: Once the DAC channel1 is enabled, PA.04 is automatically connected to the DAC converter. */
     DAC_Cmd(DAC_Channel_1, ENABLE);
+
+}
+
+int ADC_Convert(){
+//	ADC_SoftwareStartConv(ADC1); //Start the conversion
+//	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)); //Processing the conversion
+//	return ADC_GetConversionValue(ADC1); //Return the converted data
+}
+
+void ADC_Configuration(){
+
+//	ADC_InitTypeDef ADC_init_structure; //Structure for ADC configuration
+//	ADC_CommonInitTypeDef ADC_CommonInitStruct;
+//	// Clock configuration
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); //The ADC1 is connected the APB2 peripheral bus thus we will use its clock source
+//	RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_GPIOCEN, ENABLE); //Clock for the ADC port!! Do not forget about this one ;)
+//
+//	ADC_CommonInitStruct.ADC_Mode = ADC_Mode_Independent;
+//	ADC_CommonInitStruct.ADC_Prescaler = ADC_Prescaler_Div2;
+//	ADC_CommonInitStruct.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+//	ADC_CommonInitStruct.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+//	ADC_CommonInit(&ADC_CommonInitStruct);
+//	// ADC structure configuration
+//	ADC_DeInit();
+//	ADC_init_structure.ADC_DataAlign = ADC_DataAlign_Right; //data converted will be shifted to right
+//	ADC_init_structure.ADC_Resolution = ADC_Resolution_12b; //Input voltage is converted into a 12bit number giving a maximum value of 4096
+//	ADC_init_structure.ADC_ContinuousConvMode = ENABLE; //the conversion is continuous, the input data is converted more than once
+//	ADC_init_structure.ADC_ExternalTrigConv = 0;
+//	ADC_init_structure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None; //no trigger for conversion
+//	ADC_init_structure.ADC_NbrOfConversion = 2; //I think this one is clear :p
+//	ADC_init_structure.ADC_ScanConvMode = DISABLE; //The scan is configured in one channel
+//	ADC_Init(ADC1,&ADC_init_structure); //Initialize ADC with the previous configuration
+//	// Select the channel to be read from
+//	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_144Cycles); // PC0
+//	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_144Cycles); // PC1
+//	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
+//	ADC_DMACmd(ADC1, ENABLE);
+//	// Enable ADC conversion
+//	ADC_Cmd(ADC1,ENABLE);
 
 }
 
