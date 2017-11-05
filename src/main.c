@@ -199,12 +199,11 @@ int main(void)
 			addDrumBeat(getDrumBeat(beatCounter));
 			//addDrumBeat(0x0);
 //			addPianoBeat(0x0);
-//			addPianoBeat(getPianoBeat(beatCounter));
+			addPianoBeat(getPianoBeat(beatCounter));
     		addPianoTwoBeat(getPianoBeat(beatCounter));
 			// TODO: change the tempo or volume if it needs to change
 			play();
-//    		fillPianoBuffer((uint32_t)violin_g3);
-//    		DMA_ChangeBuffer(AUDIOBuffer);
+
 //    		audioPlayingFlag = 1;
 			//update the beat counter and beat flag
 			beatCounter++;
@@ -446,11 +445,14 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	/* System Clocks Configuration */
 	RCC_Configuration();
 
-	/* NVIC configuration */
-	NVIC_Configuration();
-
 	/* Configure the GPIO ports */
 	GPIO_Configuration();
+
+	/* set up the external interrupts */
+	EXTI_Configuration();
+
+	/* NVIC configuration */
+	NVIC_Configuration();
 
 	/* Timer Configuration */
 	Timer_Configuration( DMA_timerPeriod, TIMER6_PRESCALER);
@@ -463,6 +465,9 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 
 	//init the push button
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
+
+	//SPI Config
+	SPI_Configuration();
 }
 
 /**
@@ -509,6 +514,10 @@ void RCC_Configuration(void)
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2, ENABLE);
+
+    /* Enable clock for SYSCFG */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
 }
 
 /**
@@ -532,6 +541,19 @@ void NVIC_Configuration(void)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+
+    /* Add IRQ vector to NVIC */  // - SCANS FOR BUTTON PRESSES
+	/* PB 5 to 9 is connected to EXTI_Line9_5, which has EXTI9_5_IRQn vector */
+	//note: everything else is set up as above so doesnt need to be changed
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+	/* Add to NVIC */
+	NVIC_Init(&NVIC_InitStructure);
+
+	/* PB 10 to 15 is connected to EXTI_Line15_10, which has EXTI19_10_IRQn vector */
+	//note: everything else is set up as above so doesnt need to be changed
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
+	/* Add to NVIC */
+	NVIC_Init(&NVIC_InitStructure);
 
 }
 
@@ -619,6 +641,15 @@ void GPIO_Configuration(void)
 
     /* Call Init function */
     GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* Set pin PE8-15 as input for interrupts */
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 |
+							   GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }
 

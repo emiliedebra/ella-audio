@@ -59,5 +59,10 @@ void play(void);
 void pause(void);
 void resume(void);
 
+void EXTI_Configuration(void);
+void SPI_Configuration(void);
+void SPI_SendLEDData(char red, char green, char blue, char column);
+
+
 
 #endif /* MAIN_H_ */
