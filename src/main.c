@@ -69,20 +69,115 @@ void DMA1_Stream5_IRQHandler(void){
 void EXTI9_5_IRQHandler(void) {
     /* Make sure that interrupt flag is set */
     if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
-        /* Do your stuff when PB12 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 0 is triggered
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_8) == Bit_SET){
+    		pianoOneArray[0] = pianoOneArray[0] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line8);
     }
     /* Make sure that interrupt flag is set */
     else if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
-        /* Do your stuff when PB12 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 1 is triggered
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_9) == Bit_SET){
+    		pianoOneArray[1] = pianoOneArray[1] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line9);
@@ -99,55 +194,342 @@ void EXTI9_5_IRQHandler(void) {
 void EXTI15_10_IRQHandler(void) {
     /* Make sure that interrupt flag is set */
     if (EXTI_GetITStatus(EXTI_Line10) == SET) {
-        /* Do your stuff when PD10 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 2 is triggered
+
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_10) == Bit_SET){
+    		pianoOneArray[2] = pianoOneArray[2] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line10);
     }
     else if (EXTI_GetITStatus(EXTI_Line11) == SET) {
-        /* Do your stuff when PD10 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 3 is triggered
+
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_11) == Bit_SET){
+    		pianoOneArray[3] = pianoOneArray[3] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line11);
     }
     else if (EXTI_GetITStatus(EXTI_Line12) == SET) {
-        /* Do your stuff when PD10 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 4 is triggered
+
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_12) == Bit_SET){
+    		pianoOneArray[4] = pianoOneArray[4] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line12);
     }
     else if (EXTI_GetITStatus(EXTI_Line13) == SET) {
-        /* Do your stuff when PD10 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 5 is triggered
 
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_13) == Bit_SET){
+    		pianoOneArray[5] = pianoOneArray[5] ^ 0b00000001;
+    	}
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line13);
     }
     else if (EXTI_GetITStatus(EXTI_Line14) == SET) {
-        /* Do your stuff when PD10 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 6 is triggered
+
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_14) == Bit_SET){
+    		pianoOneArray[6] = pianoOneArray[6] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line14);
     }
     else if (EXTI_GetITStatus(EXTI_Line15) == SET) {
-        /* Do your stuff when PD10 is changed */
-    	STM_EVAL_LEDToggle(LED3);
-    	STM_EVAL_LEDToggle(LED5);
-    	STM_EVAL_LEDToggle(LED6);
+    	//column 7 is triggered
+
+
+    	//check row 0
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+    				   	   	  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b10000000;
+    	}
+
+    	//check row 1
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_1);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b01000000;
+    	}
+    	//check row 2
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_2);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00100000;
+    	}
+    	//check row 3
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_2);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_3);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00010000;
+    	}
+    	//check row 4
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_3);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00001000;
+    	}
+    	//check row 5
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_4);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00000100;
+    	}
+    	//check row 6
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_5);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00000010;
+    	}
+    	//check row 7
+    	GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+    	GPIO_SetBits(GPIOE, GPIO_Pin_7);
+    	if(GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_15) == Bit_SET){
+    		pianoOneArray[7] = pianoOneArray[7] ^ 0b00000001;
+    	}
 
         /* Clear interrupt flag */
         EXTI_ClearITPendingBit(EXTI_Line15);
@@ -463,7 +845,7 @@ void EXTI_Configuration(void){
 void RCC_Configuration(void)
 {
     /* Enable DMA and GPIOA Clocks */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE , ENABLE);
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2, ENABLE);
@@ -581,8 +963,6 @@ void SPI_SendLEDData(char red, char green, char blue, char column){
   */
 void GPIO_Configuration(void)
 {
-	//NOTE (from Luke): I believe this is setting up pin A4  (PA4) as the audio output
-
     GPIO_InitTypeDef GPIO_InitStruct;
 
     /* Pack the struct */
@@ -603,6 +983,19 @@ void GPIO_Configuration(void)
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+	/* Set up the outputs for the button rows */
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+							   GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+	//set these pins high
+	GPIO_SetBits(GPIOE, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
 
 }
 
