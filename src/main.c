@@ -54,7 +54,100 @@ void DMA1_Stream5_IRQHandler(void){
 	}
 }
 
+/*******************************************************************************
+* Function Name  : EXTI9_5_IRQHandler
+* Description    : Handles the interrupt from PD5-9
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void EXTI9_5_IRQHandler(void) {
+    /* Make sure that interrupt flag is set */
+    if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
+        /* Do your stuff when PB12 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
 
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line8);
+    }
+    /* Make sure that interrupt flag is set */
+    else if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
+        /* Do your stuff when PB12 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line9);
+    }
+}
+
+/*******************************************************************************
+* Function Name  : EXTI15_10_IRQHandler
+* Description    : Handles the interrupt from PD10-15
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void EXTI15_10_IRQHandler(void) {
+    /* Make sure that interrupt flag is set */
+    if (EXTI_GetITStatus(EXTI_Line10) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line10);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line11) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line11);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line12) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line12);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line13) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line13);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line14) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line14);
+    }
+    else if (EXTI_GetITStatus(EXTI_Line15) == SET) {
+        /* Do your stuff when PD10 is changed */
+    	STM_EVAL_LEDToggle(LED3);
+    	STM_EVAL_LEDToggle(LED5);
+    	STM_EVAL_LEDToggle(LED6);
+
+        /* Clear interrupt flag */
+        EXTI_ClearITPendingBit(EXTI_Line15);
+    }
+}
 /**
 **===========================================================================
 **
