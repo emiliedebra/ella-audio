@@ -1,4 +1,4 @@
-/* Includes */
+
 #include "main.h"
 
 /* -------- Variables -------- */
@@ -7,13 +7,16 @@ uint16_t PIANOONEBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 
-uint8_t pianoOneArray[8] = {0};
-uint8_t pianoTwoArray[8] = {0};
-uint8_t drumArray[8] = {0};
+// hardcoded here for now
+uint8_t pianoOneArray[8] = {0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001};
+uint8_t pianoTwoArray[8] = {0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001};
+uint8_t drumArray[8] = {0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001};
 
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
+uint8_t updateLEDs = 0;
 uint8_t audioPlayingFlag = 0;
+uint8_t ledOnCol = 0;
 
 enum pauseResume { PAUSE = 0, RESUME = 1 };
 uint8_t pauseResumeStatus = PAUSE;
@@ -39,6 +42,24 @@ void TIM2_IRQHandler(void)
     //set the beat flag so a beat can be computed and played in the main loop
     beatFlag = 1;
 
+  }
+}
+
+/*******************************************************************************
+* Function Name  : TIM3_IRQHandler
+* Description    : This function handles TIM3 global interrupt request.
+* 				   This timer represents the tempo of the instrument and
+* 				   thus the interrupt causes the beat.
+*******************************************************************************/
+void TIM3_IRQHandler(void)
+{
+  if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
+  {
+    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+    STM_EVAL_LEDToggle(LED6);
+    //change the LED to show the beat
+    ledOnCol = (ledOnCol+1)&7;
+    updateLEDs = 1;
   }
 }
 
@@ -166,7 +187,7 @@ int main(void)
     uint32_t timerFreq;
     uint16_t DMA_timerPeriod;
 
-    programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
+    // programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
 
     /* Calculate frequency of timer */
     fTimer = 10000;
@@ -179,7 +200,7 @@ int main(void)
     Controller_Setup(DMA_timerPeriod);
 
     //check the tempo on the hardware and set it to initial value
-    setTempo(60);
+    setTempo(110);
 
     while (1) {
 		// check for play or pause pressed
@@ -197,22 +218,32 @@ int main(void)
 			/* Debounce */
 			delay_ms(1);
     	}
+    	if (updateLEDs == 1) {
+				if (ledOnCol != beatCounter) {
+					SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+				}
+				else {
+					SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
+				}
+    		    updateLEDs = 0;
+    		    if(beatFlag == 1){
 
-    	if(beatFlag == 1){
+					// play the audio
+					addDrumBeat(getDrumBeat(beatCounter));
+					addPianoOneBeat(getPianoOneBeat(beatCounter));
+					addPianoTwoBeat(getPianoTwoBeat(beatCounter));
+					// TODO: change the tempo or volume if it needs to change
+					play();
 
-			//play the audio
-			addDrumBeat(getDrumBeat(beatCounter));
-			addPianoOneBeat(getPianoOneBeat(beatCounter));
-    		addPianoTwoBeat(getPianoTwoBeat(beatCounter));
-			// TODO: change the tempo or volume if it needs to change
-			play();
-			// SPI_SendLEDData(getPianoOneBeat(beatCounter), !getPianoOneBeat(beatCounter), 0x0, beatCounter);
+					// send instrument one led info
+					//update the beat counter and beat flag
+					beatCounter++;
+					if(beatCounter>=8) beatCounter = 0;
+					beatFlag = 0;
+				}
+    	}
 
-			//update the beat counter and beat flag
-			beatCounter++;
-			if(beatCounter>=8) beatCounter = 0;
-			beatFlag = 0;
-		}
+
     }
 }
 
@@ -463,10 +494,10 @@ void EXTI_Configuration(void){
 void RCC_Configuration(void)
 {
     /* Enable DMA and GPIOA Clocks */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE, ENABLE);
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3, ENABLE);
 
     /* Enable clock for SYSCFG */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
@@ -483,10 +514,18 @@ void NVIC_Configuration(void)
 	//Sets up the IRQ Handler for TIMER 2
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+
+    // Set up IRQ Handler for TIMER 3
+//    NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 
     //Sets up the IRQ Handler for the DMA transfer
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream5_IRQn;
@@ -562,13 +601,13 @@ void SPI_Configuration(void){
 void SPI_SendLEDData(char red, char green, char blue, char column){
 	GPIO_ResetBits(GPIOB, GPIO_Pin_12);
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	SPI_SendData(SPI2,red);
+	SPI_SendData(SPI2,~red);
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	SPI_SendData(SPI2,green);
+	SPI_SendData(SPI2,~green);
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	SPI_SendData(SPI2,blue);
+	SPI_SendData(SPI2,~blue);
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	SPI_SendData(SPI2,column);
+	SPI_SendData(SPI2,pow(2,7-column));
 	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
 	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY) == SET);
 	GPIO_SetBits(GPIOB, GPIO_Pin_12);
@@ -678,6 +717,14 @@ void Timer_Configuration(uint16_t wavPeriod, uint16_t preScaler)
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStruct);
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_Cmd(TIM2, ENABLE);
+
+    /* TIM3 Set Up */
+	TIM_TimeBaseStruct.TIM_Period = 100-1;
+	TIM_TimeBaseStruct.TIM_Prescaler = 1000-1;
+
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStruct);
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
 }
 
 /**
