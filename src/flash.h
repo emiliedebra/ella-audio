@@ -22,14 +22,14 @@
 #define ADDR_FLASH_SECTOR_11    ((uint32_t)0x080E0000) /* Base @ of Sector 11, 128 Kbytes */
 
 /**** PIANO MACROS ****/
-#define A3_START				((uint32_t)0x080A0000)
+#define A3_START				((uint32_t)0x080A0000) // sector 9
 #define B3_START				((uint32_t)0x080A2710)
 #define C3_START				((uint32_t)0x080A4E20)
 #define D3_START				((uint32_t)0x080A7530)
 #define E3_START				((uint32_t)0x080A9C40)
 #define F3_START				((uint32_t)0x080AC350)
 #define G3_START				((uint32_t)0x080AEA60)
-#define A4_START				((uint32_t)0x080C0000)
+#define A4_START				((uint32_t)0x080C0000) // sector 10
 
 /**** DRUM MACROS ****/
 #define KICK_START				((uint32_t)0x080C2710)
@@ -38,12 +38,23 @@
 #define CHIHAT1_START			((uint32_t)0x080C9C40)
 #define CHIHAT2_START			((uint32_t)0x080CC350)
 #define OHIHAT_START			((uint32_t)0x080CEA60)
-#define SNARE_START				((uint32_t)0x080E0000)
+#define SNARE_START				((uint32_t)0x080E0000) // sector 11
 #define CRASH_START				((uint32_t)0x080E2710)
+
+/**** PIANO TWO MACROS ****/
+#define A2_START				((uint32_t)0x080E4E20)
+#define B2_START				((uint32_t)0x080E7530)
+#define C2_START				((uint32_t)0x080E9C40)
+#define D2_START				((uint32_t)0x080EC350)
+#define E2_START				((uint32_t)0x080EEA60)
+#define F2_START				((uint32_t)0x08080000) // sector 8
+#define G2_START				((uint32_t)0x08082710)
+#define A1_START				((uint32_t)0x08084E20)
 
 
 /* ------ Function Prototypes ------ */
 uint32_t GetSector(uint32_t Address);
 uint32_t getDrumAddress(int i);
+uint32_t getViolinAddress(int i);
 void programFlash();
 #endif

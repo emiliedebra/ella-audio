@@ -29,13 +29,14 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 extern uint16_t silenceBuffer[AUDIOBUFFERSIZE];
 extern uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+extern uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint8_t beatCounter;
 extern uint8_t beatFlag;
 extern uint8_t audioPlayingFlag;
 extern uint8_t changeToSilenceFlag;
 
 extern float frequencyScaler;
-extern uint16_t frequency[8];
+extern uint16_t frequency[16];
 
 /*----- Function Prototypes ------*/
 void RCC_Configuration(void);
@@ -53,6 +54,7 @@ uint8_t getDrumBeat(uint8_t beat);
 uint8_t getPianoBeat(uint8_t beat);
 void addDrumBeat(uint8_t beat);
 void addPianoBeat(uint8_t beat);
+void addPianoTwoBeat(uint8_t beat);
 void play(void);
 void pause(void);
 void resume(void);

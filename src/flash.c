@@ -13,6 +13,7 @@ void programFlash() {
                   FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR|FLASH_FLAG_PGSERR);
 
   // Erase respective Flash sectors
+  FLASH_EraseSector(FLASH_Sector_8, VoltageRange_3);
   FLASH_EraseSector(FLASH_Sector_9, VoltageRange_3);
   FLASH_EraseSector(FLASH_Sector_10, VoltageRange_3);
   FLASH_EraseSector(FLASH_Sector_11, VoltageRange_3);
@@ -91,6 +92,79 @@ void programFlash() {
 	Address = Address + 2;
   }
 
+  /**** PIANO TWO ****/
+  // Program A2
+    fillFlashBuffer(frequency[8]);
+    Address = A2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+      FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+      Address = Address + 2;
+    }
+
+    // Program B2
+    fillFlashBuffer(frequency[9]);
+    Address = B2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
+    // Program C2
+    fillFlashBuffer(frequency[10]);
+    Address = C2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
+    // Program D2
+    fillFlashBuffer(frequency[11]);
+    Address = D2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
+    // Program E2
+    fillFlashBuffer(frequency[12]);
+    Address = E2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
+    // Program F2
+    fillFlashBuffer(frequency[13]);
+    Address = F2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
+    // Program G2
+    fillFlashBuffer(frequency[14]);
+    Address = G2_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
+    //Program A1
+    fillFlashBuffer(frequency[15]);
+    Address = A1_START;
+    for (int i = 0; i < AUDIOBUFFERSIZE; i++)
+    {
+  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	Address = Address + 2;
+    }
+
   /**** DRUMS ****/
   for (int i = 0; i < 8; i++) {
 	  createDrumSynth(i);
@@ -100,6 +174,16 @@ void programFlash() {
 		  Address += 2;
 	  }
   }
+
+  /**** VIOLIN ****/
+//  for (int i = 0; i < 8; i++) {
+//	  createViolinSynth(i);
+//	  Address = (uint32_t)getViolinAddress(i);
+//	  for (int j = 0; j < AUDIOBUFFERSIZE; j++) {
+//		  FLASH_ProgramHalfWord(Address, VIOLINBuffer[j]);
+//		  Address += 2;
+//	  }
+//  }
 
   // Lock the Flash to disable the flash control register access
   FLASH_Lock();
@@ -131,6 +215,35 @@ uint32_t getDrumAddress(int i) {
 		return SNARE_START;
 	}
 	return CRASH_START;
+}
+
+/*
+ * Returns address of drum sector (helper function)
+ */
+uint32_t getViolinAddress(int i) {
+	return 0;
+//	if (i == 0) {
+//		return VA2_START;
+//	}
+//	else if (i == 1) {
+//		return VB2_START;
+//	}
+//	else if (i == 2) {
+//		return VC3_START;
+//	}
+//	else if (i == 3) {
+//		return VD3_START;
+//	}
+//	else if (i == 4) {
+//		return VE3_START;
+//	}
+//	else if (i == 5) {
+//		return VF3_START;
+//	}
+//	else if (i == 6) {
+//		return VG3_START;
+//	}
+//	return VA3_START;
 }
 
 /*

@@ -8,6 +8,15 @@ extern unsigned char closedHiHat2[];
 extern unsigned char crash[];
 extern unsigned char hiTom[];
 extern unsigned char openHiHat[];
+//
+//extern unsigned char violin_a2[];
+//extern unsigned char violin_b2[];
+//extern unsigned char violin_c3[];
+//extern unsigned char violin_d3[];
+//extern unsigned char violin_e3[];
+//extern unsigned char violin_f3[];
+//extern unsigned char violin_g3[];
+//extern unsigned char violin_a3[];
 
 /**
   * @brief  fills respective buffers from flash (overwrite)
@@ -34,6 +43,16 @@ void fillDrumBuffer(uint32_t frequencyADDR) {
 	}
 }
 
+void fillPianoTwoBuffer(uint32_t frequencyADDR) {
+	int offset = 0;
+	uint32_t Address = frequencyADDR;
+	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+	{
+		PIANOTWOBuffer[n] = *(uint16_t*)(Address + offset);
+		offset += 2;
+	}
+}
+
 /**
   * @brief  : preps buffer for flash (overwrite)
   * @param  : uint16_t frequency
@@ -44,7 +63,7 @@ void fillFlashBuffer(uint16_t frequency) {
 	{
 		float fourthousand = n/(double)4000;
 		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(fourthousand, 2));
-		AUDIOBuffer[n] = 0.2*val;
+		AUDIOBuffer[n] = 0.1*val;
 	}
 }
 
@@ -135,6 +154,89 @@ void createDrumSynth(uint16_t drumSound) {
 }
 
 /**
+  * @brief  : writes drum arrays from extern variables (overwrite)
+  * @param  : uint16_t frequency
+  * @retval : None
+  */
+void createViolinSynth(uint16_t violinSound) {
+//	switch (violinSound) {
+//	// A2
+//	case 0:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)500;
+//			VIOLINBuffer[n] = 0.2*violin_a2[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// B2
+//	case 1:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)500;
+//			VIOLINBuffer[n] = violin_b2[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// C3
+//	case 2:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)500;
+//			VIOLINBuffer[n] = violin_c3[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// D3
+//	case 3:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)500;
+//			VIOLINBuffer[n] = violin_d3[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// E3
+//	case 4:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)500;
+//			VIOLINBuffer[n] = violin_e3[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// F3
+//	case 5:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)2000;
+//			VIOLINBuffer[n] = violin_f3[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// G3
+//	case 6:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)500;
+//			VIOLINBuffer[n] = violin_g3[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	// A3
+//	case 7:
+//		for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+//		{
+//			float threethousand = n/(double)5000;
+//			VIOLINBuffer[n] = 0.2*violin_a3[n];
+//			VIOLINBuffer[n] *= pow(M_E, -pow(threethousand, 2));
+//		}
+//		break;
+//	default: break;
+//	}
+}
+
+/**
   * @brief  adds wave from flash to respective buffer as mixer function (no overwrite)
   * @param  uint16_t frequency
   * @retval : None
@@ -153,6 +255,15 @@ void addToDrumBuffer(uint32_t frequencyADDR) {
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
 		DRUMBuffer[n] = (uint16_t)(DRUMBuffer[n] + *(uint16_t*)(Address) - (DRUMBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		Address += 2;
+	}
+}
+
+void addToPianoTwoBuffer(uint32_t frequencyADDR) {
+	uint32_t Address = frequencyADDR;
+	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
+	{
+		PIANOTWOBuffer[n] = (uint16_t)(PIANOTWOBuffer[n] + *(uint16_t*)(Address) - (PIANOTWOBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
 		Address += 2;
 	}
 }

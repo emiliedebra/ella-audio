@@ -5,7 +5,8 @@
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
 uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-
+uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+extern unsigned char violin_g3[];
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
 uint8_t audioPlayingFlag = 0;
@@ -14,7 +15,7 @@ enum pauseResume { PAUSE = 0, RESUME = 1 };
 uint8_t pauseResumeStatus = PAUSE;
 
 float frequencyScaler = 9.99E-5;
-uint16_t frequency[8] = {220, 246, 261, 293, 329, 349, 392, 440};
+uint16_t frequency[16] = {220, 246, 261, 293, 329, 349, 392, 440, 110, 123, 65, 73, 82, 87, 98, 55};
 
 /* -------- Handlers --------- */
 /*******************************************************************************
@@ -68,7 +69,7 @@ int main(void)
     uint32_t timerFreq;
     uint16_t DMA_timerPeriod;
 
-    // programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
+    programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
 
     /* Calculate frequency of timer */
     fTimer = 10000;
@@ -104,10 +105,15 @@ int main(void)
 
 			//play the audio
 			addDrumBeat(getDrumBeat(beatCounter));
-			addPianoBeat(getPianoBeat(beatCounter));
+			//addDrumBeat(0x0);
+//			addPianoBeat(0x0);
+//			addPianoBeat(getPianoBeat(beatCounter));
+    		addPianoTwoBeat(getPianoBeat(beatCounter));
 			// TODO: change the tempo or volume if it needs to change
 			play();
-
+//    		fillPianoBuffer((uint32_t)violin_g3);
+//    		DMA_ChangeBuffer(AUDIOBuffer);
+//    		audioPlayingFlag = 1;
 			//update the beat counter and beat flag
 			beatCounter++;
 			if(beatCounter>=8) beatCounter = 0;
@@ -146,8 +152,6 @@ uint8_t getDrumBeat(uint8_t beat){
 	else if (beat == 7){
 		result = 0b00010101;
 	}
-
-
 	return result;
 }
 
@@ -218,6 +222,41 @@ void addPianoBeat(uint8_t beat){
 }
 
 /**
+  * @brief  : works out which notes need to be played for the violin
+  * @param  : uint8_t beat
+  * @retval : None
+  */
+void addPianoTwoBeat(uint8_t beat){
+
+	fillPianoTwoBuffer((uint32_t)silenceBuffer);
+	for(int i = 0; i < 8; i++){
+		if ((beat & 0b00000001) == 0b00000001){
+			//then add this beat to the track
+			switch(i){
+				case 0: addToPianoTwoBuffer((uint32_t)A1_START);	// A1
+						break;
+				case 1: addToPianoTwoBuffer((uint32_t)B2_START);	// B2
+						break;
+				case 2: addToPianoTwoBuffer((uint32_t)C2_START);	// C2
+						break;
+				case 3: addToPianoTwoBuffer((uint32_t)D2_START);	// D2
+						break;
+				case 4: addToPianoTwoBuffer((uint32_t)E2_START);	// E2
+						break;
+				case 5: addToPianoTwoBuffer((uint32_t)F2_START);	// F2
+						break;
+				case 6: addToPianoTwoBuffer((uint32_t)G2_START);	// G2
+						break;
+				case 7: addToPianoTwoBuffer((uint32_t)A2_START);	// A2
+						break;
+				default: break;
+			}
+		}
+		beat = beat >> 1;
+	}
+}
+
+/**
   * @brief  : works out which notes need to be played for the drum
   * @param  : uint8_t beat
   * @retval : None
@@ -258,6 +297,7 @@ void addDrumBeat(uint8_t beat){
   */
 void play() {
 	addToDrumBuffer((uint32_t)AUDIOBuffer);
+	addToDrumBuffer((uint32_t)PIANOTWOBuffer);
 	DMA_ChangeBuffer(DRUMBuffer);
 	audioPlayingFlag = 1;
 }
