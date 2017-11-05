@@ -23,12 +23,12 @@ extern unsigned char openHiHat[];
   * @param  uint16_t frequency
   * @retval : None
   */
-void fillPianoBuffer(uint32_t frequencyADDR) {
+void fillPianoOneBuffer(uint32_t frequencyADDR) {
 	int offset = 0;
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		AUDIOBuffer[n] = *(uint16_t*)(Address + offset);
+		PIANOONEBuffer[n] = *(uint16_t*)(Address + offset);
 		offset += 2;
 	}
 }
@@ -63,7 +63,7 @@ void fillFlashBuffer(uint16_t frequency) {
 	{
 		float fourthousand = n/(double)4000;
 		uint16_t val = (uint16_t)((0xFFF+1)/2)*sin((2*M_PI*n*frequency*frequencyScaler)+1)*pow(M_E, -pow(fourthousand, 2));
-		AUDIOBuffer[n] = 0.1*val;
+		PIANOONEBuffer[n] = 0.1*val;
 	}
 }
 
@@ -241,11 +241,11 @@ void createViolinSynth(uint16_t violinSound) {
   * @param  uint16_t frequency
   * @retval : None
   */
-void addToPianoBuffer(uint32_t frequencyADDR) {
+void addToPianoOneBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		AUDIOBuffer[n] = (uint16_t)(AUDIOBuffer[n] + *(uint16_t*)(Address) - (AUDIOBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		PIANOONEBuffer[n] = (uint16_t)(PIANOONEBuffer[n] + *(uint16_t*)(Address) - (PIANOONEBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
 		Address += 2;
 	}
 }

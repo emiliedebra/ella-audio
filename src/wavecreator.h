@@ -11,10 +11,10 @@
 void fillFlashBuffer(uint16_t frequency);
 void createDrumSynth(uint16_t frequency);
 void createViolinSynth(uint16_t violinSound);
-void fillPianoBuffer(uint32_t frequencyADDR);
+void fillPianoOneBuffer(uint32_t frequencyADDR);
 void fillDrumBuffer(uint32_t frequencyADDR);
 void fillPianoTwoBuffer(uint32_t frequencyADDR);
-void addToPianoBuffer(uint32_t frequencyADDR);
+void addToPianoOneBuffer(uint32_t frequencyADDR);
 void addToDrumBuffer(uint32_t frequencyADDR);
 void addToPianoTwoBuffer(uint32_t frequencyADDR);
 #endif

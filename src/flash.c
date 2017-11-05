@@ -25,7 +25,7 @@ void programFlash() {
   uint32_t Address = A3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-    FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+    FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
     Address = Address + 2;
   }
 
@@ -34,7 +34,7 @@ void programFlash() {
   Address = B3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -43,7 +43,7 @@ void programFlash() {
   Address = C3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -52,7 +52,7 @@ void programFlash() {
   Address = D3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -61,7 +61,7 @@ void programFlash() {
   Address = E3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -70,7 +70,7 @@ void programFlash() {
   Address = F3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -79,7 +79,7 @@ void programFlash() {
   Address = G3_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -88,7 +88,7 @@ void programFlash() {
   Address = A4_START;
   for (int i = 0; i < AUDIOBUFFERSIZE; i++)
   {
-	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
 	Address = Address + 2;
   }
 
@@ -98,7 +98,7 @@ void programFlash() {
     Address = A2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-      FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+      FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
       Address = Address + 2;
     }
 
@@ -107,7 +107,7 @@ void programFlash() {
     Address = B2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 
@@ -116,7 +116,7 @@ void programFlash() {
     Address = C2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 
@@ -125,7 +125,7 @@ void programFlash() {
     Address = D2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 
@@ -134,7 +134,7 @@ void programFlash() {
     Address = E2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 
@@ -143,7 +143,7 @@ void programFlash() {
     Address = F2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 
@@ -152,7 +152,7 @@ void programFlash() {
     Address = G2_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 
@@ -161,7 +161,7 @@ void programFlash() {
     Address = A1_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
-  	FLASH_ProgramHalfWord(Address, AUDIOBuffer[i]);
+  	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);
   	Address = Address + 2;
     }
 

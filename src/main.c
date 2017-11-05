@@ -3,9 +3,14 @@
 
 /* -------- Variables -------- */
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
-uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+uint16_t PIANOONEBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+
+uint8_t pianoOneArray[8] = {0};
+uint8_t pianoTwoArray[8] = {0};
+uint8_t drumArray[8] = {0};
+
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
 uint8_t audioPlayingFlag = 0;
@@ -197,14 +202,12 @@ int main(void)
 
 			//play the audio
 			addDrumBeat(getDrumBeat(beatCounter));
-			//addDrumBeat(0x0);
-//			addPianoBeat(0x0);
-			addPianoBeat(getPianoBeat(beatCounter));
-    		addPianoTwoBeat(getPianoBeat(beatCounter));
+			addPianoOneBeat(getPianoOneBeat(beatCounter));
+    		addPianoTwoBeat(getPianoTwoBeat(beatCounter));
 			// TODO: change the tempo or volume if it needs to change
 			play();
+			// SPI_SendLEDData(getPianoOneBeat(beatCounter), !getPianoOneBeat(beatCounter), 0x0, beatCounter);
 
-//    		audioPlayingFlag = 1;
 			//update the beat counter and beat flag
 			beatCounter++;
 			if(beatCounter>=8) beatCounter = 0;
@@ -215,66 +218,16 @@ int main(void)
 
 /* ---------- Controller Methods ---------- */
 
-// DEBUG PURPOSES ONLY
 uint8_t getDrumBeat(uint8_t beat){
-	uint8_t result = 0;
-
-	if(beat == 0){
-		result = 0b00010101;
-	}
-	else if (beat == 1){
-		result = 0b00101011;
-	}
-	else if (beat == 2){
-		result = 0b00001011;
-	}
-	else if (beat == 3){
-		result = 0b00010001;
-	}
-	else if (beat == 4){
-		result = 0b00010101;
-	}
-	else if (beat == 5){
-		result = 0b00001011;
-	}
-	else if (beat == 6){
-		result = 0b00000001;
-	}
-	else if (beat == 7){
-		result = 0b00010101;
-	}
-	return result;
+	return drumArray[beat];
 }
 
-// DEBUG PURPOSES ONLY
-uint8_t getPianoBeat(uint8_t beat){
-	uint8_t result = 0;
+uint8_t getPianoOneBeat(uint8_t beat){
+	return pianoOneArray[beat];
+}
 
-	if(beat == 0){
-		result = 0b00010101;
-	}
-	else if (beat == 1){
-		result = 0b00101010;
-	}
-	else if (beat == 2){
-		result = 0b00001010;
-	}
-	else if (beat == 3){
-		result = 0b00010000;
-	}
-	else if (beat == 4){
-		result = 0b00010101;
-	}
-	else if (beat == 5){
-		result = 0b00001010;
-	}
-	else if (beat == 6){
-		result = 0b00000000;
-	}
-	else if (beat == 7){
-		result = 0b00010101;
-	}
-	return result;
+uint8_t getPianoTwoBeat(uint8_t beat) {
+	return pianoTwoArray[beat];
 }
 
 /**
@@ -282,28 +235,28 @@ uint8_t getPianoBeat(uint8_t beat){
   * @param  : uint8_t beat
   * @retval : None
   */
-void addPianoBeat(uint8_t beat){
+void addPianoOneBeat(uint8_t beat){
 
-	fillPianoBuffer((uint32_t)silenceBuffer);
+	fillPianoOneBuffer((uint32_t)silenceBuffer);
 	for(int i = 0; i < 8; i++){
 		if ((beat & 0b00000001) == 0b00000001){
 			//then add this beat to the track
 			switch(i){
-				case 0: addToPianoBuffer((uint32_t)A4_START);	// A4
+				case 0: addToPianoOneBuffer((uint32_t)A4_START);	// A4
 						break;
-				case 1: addToPianoBuffer((uint32_t)G3_START);	// G3
+				case 1: addToPianoOneBuffer((uint32_t)G3_START);	// G3
 						break;
-				case 2: addToPianoBuffer((uint32_t)F3_START);	// F3
+				case 2: addToPianoOneBuffer((uint32_t)F3_START);	// F3
 						break;
-				case 3: addToPianoBuffer((uint32_t)E3_START);	// E3
+				case 3: addToPianoOneBuffer((uint32_t)E3_START);	// E3
 						break;
-				case 4: addToPianoBuffer((uint32_t)D3_START);	// D3
+				case 4: addToPianoOneBuffer((uint32_t)D3_START);	// D3
 						break;
-				case 5: addToPianoBuffer((uint32_t)C3_START);	// C3
+				case 5: addToPianoOneBuffer((uint32_t)C3_START);	// C3
 						break;
-				case 6: addToPianoBuffer((uint32_t)B3_START);	// B3
+				case 6: addToPianoOneBuffer((uint32_t)B3_START);	// B3
 						break;
-				case 7: addToPianoBuffer((uint32_t)A3_START);	// A3
+				case 7: addToPianoOneBuffer((uint32_t)A3_START);	// A3
 						break;
 				default: break;
 			}
@@ -387,7 +340,7 @@ void addDrumBeat(uint8_t beat){
   * @retval : None
   */
 void play() {
-	addToDrumBuffer((uint32_t)AUDIOBuffer);
+	addToDrumBuffer((uint32_t)PIANOONEBuffer);
 	addToDrumBuffer((uint32_t)PIANOTWOBuffer);
 	DMA_ChangeBuffer(DRUMBuffer);
 	audioPlayingFlag = 1;

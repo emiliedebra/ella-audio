@@ -27,7 +27,7 @@ typedef enum {FAILED = 0, PASSED = !FAILED} TestStatus;
 
 /* ----- Variables ------ */
 extern uint16_t silenceBuffer[AUDIOBUFFERSIZE];
-extern uint16_t AUDIOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
+extern uint16_t PIANOONEBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint8_t beatCounter;
@@ -51,9 +51,10 @@ void delay_ms(uint32_t milli);
 void Controller_Setup(uint16_t DMA_timerPeriod);
 void setTempo(uint16_t bpm);
 uint8_t getDrumBeat(uint8_t beat);
-uint8_t getPianoBeat(uint8_t beat);
+uint8_t getPianoOneBeat(uint8_t beat);
+uint8_t getPianoTwoBeat(uint8_t beat);
 void addDrumBeat(uint8_t beat);
-void addPianoBeat(uint8_t beat);
+void addPianoOneBeat(uint8_t beat);
 void addPianoTwoBeat(uint8_t beat);
 void play(void);
 void pause(void);
