@@ -55,6 +55,5 @@
 /* ------ Function Prototypes ------ */
 uint32_t GetSector(uint32_t Address);
 uint32_t getDrumAddress(int i);
-uint32_t getViolinAddress(int i);
 void programFlash();
 #endif

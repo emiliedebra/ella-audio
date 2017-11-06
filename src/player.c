@@ -1,5 +1,9 @@
 #include "main.h"
-
+/**
+  * @brief  : Get button presses saved in instrument arrays
+  * @param  : uint8_t beat
+  * @retval : None
+  */
 uint8_t getDrumBeat(uint8_t beat){
 	return drumArray[beat];
 }
@@ -13,7 +17,7 @@ uint8_t getPianoTwoBeat(uint8_t beat) {
 }
 
 /**
-  * @brief  : works out which notes need to be played for the piano
+  * @brief  : adds notes that need to be played for the respective instrument
   * @param  : uint8_t beat
   * @retval : None
   */
@@ -47,11 +51,6 @@ void addPianoOneBeat(uint8_t beat){
 	}
 }
 
-/**
-  * @brief  : works out which notes need to be played for the violin
-  * @param  : uint8_t beat
-  * @retval : None
-  */
 void addPianoTwoBeat(uint8_t beat){
 
 	fillPianoTwoBuffer((uint32_t)silenceBuffer);
@@ -82,11 +81,6 @@ void addPianoTwoBeat(uint8_t beat){
 	}
 }
 
-/**
-  * @brief  : works out which notes need to be played for the drum
-  * @param  : uint8_t beat
-  * @retval : None
-  */
 void addDrumBeat(uint8_t beat){
 	fillDrumBuffer((uint32_t)silenceBuffer);
 	for(int i = 0; i < 8; i++){
@@ -124,11 +118,6 @@ void addDrumBeat(uint8_t beat){
 void play() {
 	addToDrumBuffer((uint32_t)PIANOONEBuffer);
 	addToDrumBuffer((uint32_t)PIANOTWOBuffer);
-	// get Volume
-//	float volume = getVolume();
-//	for (int i = 0; i < AUDIOBUFFERSIZE; i++) {
-//		DRUMBuffer[i] = volume*DRUMBuffer[i];
-//	}
 	DMA_ChangeBuffer(DRUMBuffer);
 	audioPlayingFlag = 1;
 }

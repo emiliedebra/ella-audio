@@ -108,7 +108,7 @@ int main(void)
     setTempo(60);
 
     while (1) {
-		// check for play or pause pressed
+		// check for play or pause pressed (PC2)
     	if(GPIO_ReadInputDataBit(GPIOC, 0b100) == Bit_SET){
 			while(GPIO_ReadInputDataBit(GPIOD, 0b100) == Bit_SET);
 			if (pauseResumeStatus == PAUSE) {
@@ -117,6 +117,14 @@ int main(void)
 			else {
 				pause();
 			}
+			delay_ms(1);
+		}
+    	// check for clear (PC3)
+    	if(GPIO_ReadInputDataBit(GPIOC, 0b1000) == Bit_SET){
+			while(GPIO_ReadInputDataBit(GPIOD, 0b1000) == Bit_SET);
+			memset(drumArray, 0, 8);
+			memset(pianoOneArray, 0, 8);
+			memset(pianoTwoArray, 0, 8);
 			delay_ms(1);
 		}
 
@@ -308,35 +316,27 @@ int ADC_Convert(){
  */
 void Controller_Setup(uint16_t DMA_timerPeriod){
 
-	/* LED Configuration */
+	// LED Configuration (DEBUG)
     STM_EVAL_LEDInit(LED3);
     STM_EVAL_LEDInit(LED4);
     STM_EVAL_LEDInit(LED5);
     STM_EVAL_LEDInit(LED6);
-
-	/* System Clocks Configuration */
-	RCC_Configuration();
-
-	/* Configure the GPIO ports */
-	GPIO_Configuration();
-
-
-	/* NVIC configuration */
-	NVIC_Configuration();
-
-	/* Timer Configuration */
-	Timer_Configuration( DMA_timerPeriod, TIMER6_PRESCALER);
-
-	/* DAC Configuration */
-	DAC_Configuration();
-
-	/* DMA Config */
-	DMA_Configuration(silenceBuffer);
-
-	//init the push button
+	// Push Button Init (DEBUG)
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_GPIO);
 
-	//SPI Config
+	// System Clocks Configuration
+	RCC_Configuration();
+	// Configure the GPIO ports
+	GPIO_Configuration();
+	// NVIC configuration
+	NVIC_Configuration();
+	// Timer Configuration
+	Timer_Configuration( DMA_timerPeriod, TIMER6_PRESCALER);
+	// DAC Configuration
+	DAC_Configuration();
+	// DMA Config
+	DMA_Configuration(silenceBuffer);
+	// SPI Config
 	SPI_Configuration();
 }
 

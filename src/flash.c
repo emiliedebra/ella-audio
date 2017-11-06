@@ -174,17 +174,6 @@ void programFlash() {
 		  Address += 2;
 	  }
   }
-
-  /**** VIOLIN ****/
-//  for (int i = 0; i < 8; i++) {
-//	  createViolinSynth(i);
-//	  Address = (uint32_t)getViolinAddress(i);
-//	  for (int j = 0; j < AUDIOBUFFERSIZE; j++) {
-//		  FLASH_ProgramHalfWord(Address, VIOLINBuffer[j]);
-//		  Address += 2;
-//	  }
-//  }
-
   // Lock the Flash to disable the flash control register access
   FLASH_Lock();
 }
@@ -215,35 +204,6 @@ uint32_t getDrumAddress(int i) {
 		return SNARE_START;
 	}
 	return CRASH_START;
-}
-
-/*
- * Returns address of drum sector (helper function)
- */
-uint32_t getViolinAddress(int i) {
-	return 0;
-//	if (i == 0) {
-//		return VA2_START;
-//	}
-//	else if (i == 1) {
-//		return VB2_START;
-//	}
-//	else if (i == 2) {
-//		return VC3_START;
-//	}
-//	else if (i == 3) {
-//		return VD3_START;
-//	}
-//	else if (i == 4) {
-//		return VE3_START;
-//	}
-//	else if (i == 5) {
-//		return VF3_START;
-//	}
-//	else if (i == 6) {
-//		return VG3_START;
-//	}
-//	return VA3_START;
 }
 
 /*
