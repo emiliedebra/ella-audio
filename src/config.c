@@ -8,7 +8,7 @@
 void RCC_Configuration(void)
 {
     /* Enable DMA and GPIOA Clocks */
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE , ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_DMA2 | RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOE | RCC_AHB1Periph_GPIOC , ENABLE);
 
     /* Enable DAC1 and TIM6 & TIM2 clocks */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC | RCC_APB1Periph_TIM6 | RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3, ENABLE);
@@ -117,7 +117,7 @@ void GPIO_Configuration(void)
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 
@@ -127,7 +127,7 @@ void GPIO_Configuration(void)
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 	//set these pins high
@@ -135,15 +135,15 @@ void GPIO_Configuration(void)
 			   	   	    GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
 
 	// Pins for Volume and Tempo
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;// PC0, PC1
-//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN; //The pins are configured in analog mode
-//	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL ; //We don't need any pull up or pull down
-//	GPIO_Init(GPIOC, &GPIO_InitStruct); //Initialize GPIOC pins with the configuration
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1; //PA1
-//	GPIO_Init(GPIOA, &GPIO_InitStruct); //Initialize GPIOA pins with the configuration
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;// PC0, PC1
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AN; //The pins are configured in analog mode
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL ; //We don't need any pull up or pull down
+	GPIO_Init(GPIOC, &GPIO_InitStruct); //Initialize GPIOC pins with the configuration
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1; //PA1
+	GPIO_Init(GPIOA, &GPIO_InitStruct); //Initialize GPIOA pins with the configuration
 //
 //	// output LEDs for instrument
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_15 ;
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_8 | GPIO_Pin_15 ;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
@@ -151,7 +151,13 @@ void GPIO_Configuration(void)
 	GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 	//set these pins high
-	GPIO_SetBits(GPIOA,  GPIO_Pin_10 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_15);
+	GPIO_ResetBits(GPIOA,  GPIO_Pin_10 | GPIO_Pin_8 | GPIO_Pin_15);
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6 ;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	// Pins for input buttons play/pause
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
@@ -207,10 +213,13 @@ void DMA_Configuration(uint16_t * waveBuffer)
 
     /* Enable DMA */
     DMA_Cmd(DMA1_Stream5, ENABLE);
+}
 
-//    // Channel 0 Stream 0 init (for ADC)
-//    DMA_InitStructure.DMA_Channel = DMA_Channel_2;
-//	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;//ADC3's data register
+void DMA0_Configuration() {
+//	DMA_InitTypeDef DMA_InitStructure;
+//	// Channel 0 Stream 0 init (for ADC)
+//	DMA_InitStructure.DMA_Channel = DMA_Channel_2;
+//	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;//ADC1's data register
 //	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&ADC1ConvertedValue;
 //	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
 //	DMA_InitStructure.DMA_BufferSize = 2;
@@ -300,35 +309,34 @@ void DAC_Configuration(void)
 }
 
 void ADC_Configuration(){
+	ADC_InitTypeDef ADC_init_structure; //Structure for ADC configuration
+	ADC_CommonInitTypeDef ADC_CommonInitStruct;
+	// Clock configuration
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); //The ADC1 is connected the APB2 peripheral bus thus we will use its clock source
+	RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_GPIOCEN, ENABLE); //Clock for the ADC port!! Do not forget about this one ;)
 
-//	ADC_InitTypeDef ADC_init_structure; //Structure for ADC configuration
-//	ADC_CommonInitTypeDef ADC_CommonInitStruct;
-//	// Clock configuration
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); //The ADC1 is connected the APB2 peripheral bus thus we will use its clock source
-//	RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_GPIOCEN, ENABLE); //Clock for the ADC port!! Do not forget about this one ;)
-//
-//	ADC_CommonInitStruct.ADC_Mode = ADC_Mode_Independent;
-//	ADC_CommonInitStruct.ADC_Prescaler = ADC_Prescaler_Div2;
-//	ADC_CommonInitStruct.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
-//	ADC_CommonInitStruct.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
-//	ADC_CommonInit(&ADC_CommonInitStruct);
-//	// ADC structure configuration
-//	ADC_DeInit();
-//	ADC_init_structure.ADC_DataAlign = ADC_DataAlign_Right; //data converted will be shifted to right
-//	ADC_init_structure.ADC_Resolution = ADC_Resolution_12b; //Input voltage is converted into a 12bit number giving a maximum value of 4096
-//	ADC_init_structure.ADC_ContinuousConvMode = ENABLE; //the conversion is continuous, the input data is converted more than once
-//	ADC_init_structure.ADC_ExternalTrigConv = 0;
-//	ADC_init_structure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None; //no trigger for conversion
-//	ADC_init_structure.ADC_NbrOfConversion = 2; //I think this one is clear :p
-//	ADC_init_structure.ADC_ScanConvMode = DISABLE; //The scan is configured in one channel
-//	ADC_Init(ADC1,&ADC_init_structure); //Initialize ADC with the previous configuration
-//	// Select the channel to be read from
+	ADC_CommonInitStruct.ADC_Mode = ADC_Mode_Independent;
+	ADC_CommonInitStruct.ADC_Prescaler = ADC_Prescaler_Div2;
+	ADC_CommonInitStruct.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+	ADC_CommonInitStruct.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+	ADC_CommonInit(&ADC_CommonInitStruct);
+	// ADC structure configuration
+	ADC_DeInit();
+	ADC_init_structure.ADC_DataAlign = ADC_DataAlign_Right; //data converted will be shifted to right
+	ADC_init_structure.ADC_Resolution = ADC_Resolution_12b; //Input voltage is converted into a 12bit number giving a maximum value of 4096
+	ADC_init_structure.ADC_ContinuousConvMode = DISABLE; //the conversion is continuous, the input data is converted more than once
+	ADC_init_structure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
+	ADC_init_structure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None; //no trigger for conversion
+	ADC_init_structure.ADC_NbrOfConversion = 1; //I think this one is clear :p
+	ADC_init_structure.ADC_ScanConvMode = DISABLE; //The scan is configured in one channel
+	ADC_Init(ADC1,&ADC_init_structure); //Initialize ADC with the previous configuration
+	// Select the channel to be read from
 //	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_144Cycles); // PC0
 //	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_144Cycles); // PC1
-//	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
-//	ADC_DMACmd(ADC1, ENABLE);
-//	// Enable ADC conversion
-//	ADC_Cmd(ADC1,ENABLE);
+	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
+	ADC_DMACmd(ADC1, ENABLE);
+	// Enable ADC conversion
+	ADC_Cmd(ADC1,ENABLE);
 
 }
 

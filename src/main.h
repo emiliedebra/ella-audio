@@ -30,7 +30,7 @@ extern uint16_t silenceBuffer[AUDIOBUFFERSIZE];
 extern uint16_t PIANOONEBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
 extern uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-
+extern uint32_t ADC1ConvertedValue[2];
 extern uint8_t pianoOneArray[8];
 extern uint8_t pianoTwoArray[8];
 extern uint8_t drumArray[8];
@@ -49,6 +49,7 @@ extern uint16_t frequency[16];
 /*----- Function Prototypes ------*/
 void RCC_Configuration(void);
 void DMA_Configuration(uint16_t * waveBuffer);
+void DMA0_Configuration(void);
 void DMA_ChangeBuffer(uint16_t *waveBuffer);
 void NVIC_Configuration(void);
 void GPIO_Configuration(void);
@@ -58,7 +59,8 @@ void DAC_Configuration(void);
 void ADC_Configuration(void);
 void delay_ms(uint32_t milli);
 void Controller_Setup(uint16_t DMA_timerPeriod);
-int ADC_Convert(void);
+int ADC_Convert_Volume(void);
+int ADC_Convert_Tempo(void);
 void setInstrument(void);
 uint8_t getDrumBeat(uint8_t beat);
 uint8_t getPianoOneBeat(uint8_t beat);
@@ -68,12 +70,13 @@ void addPianoOneBeat(uint8_t beat);
 void addPianoTwoBeat(uint8_t beat);
 void play(void);
 void pause(void);
+void stop(void);
 void resume(void);
 float getVolume(void);
 void setVolume(void);
 uint8_t getTempo(void);
 void setTempo(uint16_t bpm);
-void checkButtons(void);
+void checkButtons(uint8_t row);
 
 void EXTI_Configuration(void);
 void SPI_Configuration(void);

@@ -11,15 +11,16 @@ uint32_t ADC1ConvertedValue[2] = {0};
 uint8_t pianoOneArray[8] = {0};
 uint8_t pianoTwoArray[8] = {0};
 uint8_t drumArray[8] = {0};
-
+uint16_t DMA_timerPeriod;
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
 uint8_t updateLEDs = 0;
 uint8_t audioPlayingFlag = 0;
 uint8_t ledOnCol = 0;
 uint8_t instrument = 0;
-float volume = 0.5;
-
+float volume = 0;
+uint8_t row = 0;
+uint8_t alternate = 0;
 uint8_t pauseResumeStatus = PAUSE;
 
 float frequencyScaler = 9.99E-5;
@@ -91,7 +92,7 @@ int main(void)
 {
     uint32_t fTimer;
     uint32_t timerFreq;
-    uint16_t DMA_timerPeriod;
+
 
     // programFlash(); /* Uncomment if you want to program flash - ONLY RUN ONCE */
 
@@ -104,28 +105,25 @@ int main(void)
     // Set up the micro
     Controller_Setup(DMA_timerPeriod);
     // check the tempo on the hardware and set it to initial value
-    // TODO: setTempo(getTempo());
-    setTempo(60);
+    setTempo(getTempo());
+    setVolume();
 
     while (1) {
 		// check for play or pause pressed (PC2)
-    	if(GPIO_ReadInputDataBit(GPIOC, 0b100) == Bit_SET){
-			while(GPIO_ReadInputDataBit(GPIOD, 0b100) == Bit_SET);
+    	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2) == Bit_SET){
+			while(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2) == Bit_SET);
 			if (pauseResumeStatus == PAUSE) {
 				resume();
 			}
 			else {
 				pause();
 			}
-			delay_ms(1);
 		}
     	// check for clear (PC3)
-    	if(GPIO_ReadInputDataBit(GPIOC, 0b1000) == Bit_SET){
-			while(GPIO_ReadInputDataBit(GPIOD, 0b1000) == Bit_SET);
-			memset(drumArray, 0, 8);
-			memset(pianoOneArray, 0, 8);
-			memset(pianoTwoArray, 0, 8);
-			delay_ms(1);
+    	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3) == Bit_SET){
+			while(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3) == Bit_SET);
+			stop();
+			continue;
 		}
 
     	// update the LEDs
@@ -133,48 +131,69 @@ int main(void)
 			if (ledOnCol != beatCounter) {
 				if (instrument == 0) {
 					SPI_SendLEDData(0x0, 0x0, drumArray[ledOnCol], ledOnCol);
+					GPIO_SetBits(GPIOA,  GPIO_Pin_8);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_15);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
 				}
 				else if (instrument == 1) {
 					SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+					GPIO_SetBits(GPIOA,  GPIO_Pin_15);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_8);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
 				}
 				else if (instrument == 2) {
-					SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+					SPI_SendLEDData(0x0, 0x0, pianoTwoArray[ledOnCol], ledOnCol);
+					GPIO_SetBits(GPIOC,  GPIO_Pin_6);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_15);
+				}
+				else {
+
+					GPIO_SetBits(GPIOA,  GPIO_Pin_10);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
 				}
 			}
 			else {
-				uint8_t LEDbeat = 0;
-				if (beatCounter == 0) {
-					LEDbeat = 7;
-				}
-				else {
-					LEDbeat = beatCounter - 1;
-				}
 				if (instrument == 0) {
-					SPI_SendLEDData(getDrumBeat(LEDbeat), ~getDrumBeat(LEDbeat), 0x0, LEDbeat);
+					SPI_SendLEDData(getDrumBeat(beatCounter), ~getDrumBeat(beatCounter), 0x0, beatCounter);
 				}
 				else if (instrument == 1) {
-					SPI_SendLEDData(getPianoOneBeat(LEDbeat), ~getPianoOneBeat(LEDbeat), 0x0, LEDbeat);
+					SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
 				}
 				else if (instrument == 2) {
-					SPI_SendLEDData(getPianoTwoBeat(LEDbeat), ~getPianoTwoBeat(LEDbeat), 0x0, LEDbeat);
+					SPI_SendLEDData(getPianoTwoBeat(beatCounter), ~getPianoTwoBeat(beatCounter), 0x0, beatCounter);
 				}
 				STM_EVAL_LEDToggle(LED5);
 			}
 			updateLEDs = 0;
-
 			// update from all controllers
-			checkButtons();
-			// setTempo(getTempo());
-			// setVolume();
+
+			if (alternate == 1){
+				row++;
+				if (row > 7) row = 0;
+				checkButtons(row);
+				alternate = 0;
+			}
+			else {
+				alternate++;
+			}
+
+
+			setTempo(getTempo());
+			setVolume();
 			setInstrument();
     	}
 
     	// play the audio
 		if(beatFlag == 1) {
 			// play the audio
-			addDrumBeat(getDrumBeat(beatCounter));
-			addPianoOneBeat(getPianoOneBeat(beatCounter));
-			addPianoTwoBeat(getPianoTwoBeat(beatCounter));
+			uint8_t playBeat = beatCounter + 1;
+			if (beatCounter == 7) {
+				playBeat = 0;
+			}
+			addDrumBeat(getDrumBeat(playBeat));
+			addPianoOneBeat(getPianoOneBeat(playBeat));
+			addPianoTwoBeat(getPianoTwoBeat(playBeat));
 			play();
 
 			//update the beat counter and beat flag
@@ -190,30 +209,38 @@ int main(void)
   * @param  : None
   * @retval : None
   */
-void checkButtons(){
-	for(uint8_t row = 0; row<8; row++){
+void checkButtons(uint8_t row){
+	//uint8_t buttonSetFlag = 0;
+	//for(uint8_t row = 0; row<8; row++){
 		//check row
 		GPIO_ResetBits(GPIOE, 0b11111111); // reset all bits
 		GPIO_SetBits(GPIOE, (1<<row)); // set current row enabled
 		for(uint8_t col = 8; col<16; col++){
+			//if(buttonSetFlag == 1) return;
 			if(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET){
 				while(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET);
 				// if drum selected
+
 				if (instrument == 0) {
 					drumArray[col-8] = drumArray[col-8] ^ (0b10000000>>row);
+					//buttonSetFlag = 1;
 				}
 				// else if piano one selected
 				else if (instrument == 1) {
 					pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
+					//buttonSetFlag = 1;
 				}
 				// else if piano two selected
 				else if (instrument == 2) {
 					pianoTwoArray[col-8] = pianoTwoArray[col-8] ^ (0b10000000>>row);
+					//buttonSetFlag = 1;
 				}
-				delay_ms(1);
+				// delay_ms(1);
 			}
+
 		}
-	}
+		GPIO_ResetBits(GPIOE, 0b11111111);
+	//}
 }
 
 /* ---------- Controller Methods ---------- */
@@ -223,7 +250,8 @@ void checkButtons(){
   * @retval : None
   */
 float getVolume() {
-	return ADC1ConvertedValue[1];
+	volume = ADC_Convert_Volume();
+	return (volume*1.1/(double)3860)+0.33161;
 }
 
 /**
@@ -232,7 +260,8 @@ float getVolume() {
   * @retval : None
   */
 uint8_t getTempo() {
-	return ADC1ConvertedValue[0];
+	uint16_t tempo = ADC_Convert_Tempo();
+	return (0.0208*tempo + 24.824);
 }
 
 /**
@@ -253,6 +282,20 @@ void setTempo(uint16_t bpm){
 void setVolume() {
 	volume = getVolume();
 }
+
+
+void stop() {
+	if (instrument == 0) {
+		memset(drumArray, 0b0, 8);
+	}
+	else if (instrument == 1) {
+		memset(pianoOneArray, 0b0, 8);
+	}
+	else {
+		memset(pianoTwoArray, 0b0, 8);
+	}
+}
+
 
 /**
   * @brief  : Changes the buffer the DMA is sending to the DAC
@@ -298,11 +341,18 @@ void SPI_SendLEDData(char red, char green, char blue, char column){
 	GPIO_SetBits(GPIOB, GPIO_Pin_12);
 }
 
-int ADC_Convert(){
-	return 0;
-//	ADC_SoftwareStartConv(ADC1); //Start the conversion
-//	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)); //Processing the conversion
-//	return ADC_GetConversionValue(ADC1); //Return the converted data
+int ADC_Convert_Volume(){
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_144Cycles); // PC1
+	ADC_SoftwareStartConv(ADC1); //Start the conversion
+	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)); //Processing the conversion
+	return ADC_GetConversionValue(ADC1); //Return the converted data
+}
+
+int ADC_Convert_Tempo(){
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 1, ADC_SampleTime_144Cycles); // PC1
+	ADC_SoftwareStartConv(ADC1); //Start the conversion
+	while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)); //Processing the conversion
+	return ADC_GetConversionValue(ADC1); //Return the converted data
 }
 
 /* ------------ Configuration Methods ----------- */
@@ -336,6 +386,8 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	DAC_Configuration();
 	// DMA Config
 	DMA_Configuration(silenceBuffer);
+	DMA0_Configuration();
+	ADC_Configuration();
 	// SPI Config
 	SPI_Configuration();
 }

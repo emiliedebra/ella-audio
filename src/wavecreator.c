@@ -153,7 +153,7 @@ void addToPianoOneBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		PIANOONEBuffer[n] = volume*(uint16_t)(PIANOONEBuffer[n] + *(uint16_t*)(Address) - (PIANOONEBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		PIANOONEBuffer[n] = ((uint16_t)(PIANOONEBuffer[n] + *(uint16_t*)(Address) - (PIANOONEBuffer[n]*(*(uint16_t*)(Address)))/(double)2048));
 		Address += 2;
 	}
 }
@@ -162,7 +162,7 @@ void addToDrumBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		DRUMBuffer[n] = volume*(uint16_t)(DRUMBuffer[n] + *(uint16_t*)(Address) - (DRUMBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		DRUMBuffer[n] = ((uint16_t)(DRUMBuffer[n] + *(uint16_t*)(Address) - (DRUMBuffer[n]*(*(uint16_t*)(Address)))/(double)2048));
 		Address += 2;
 	}
 }
@@ -171,7 +171,7 @@ void addToPianoTwoBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		PIANOTWOBuffer[n] = volume*(uint16_t)(PIANOTWOBuffer[n] + *(uint16_t*)(Address) - (PIANOTWOBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		PIANOTWOBuffer[n] = ((uint16_t)(PIANOTWOBuffer[n] + *(uint16_t*)(Address) - (PIANOTWOBuffer[n]*(*(uint16_t*)(Address)))/(double)2048));
 		Address += 2;
 	}
 }

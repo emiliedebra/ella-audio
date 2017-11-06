@@ -49,6 +49,9 @@ void addPianoOneBeat(uint8_t beat){
 		}
 		beat = beat >> 1;
 	}
+	for (int i = 0; i < AUDIOBUFFERSIZE; i++) {
+		PIANOONEBuffer[i] *= volume;
+	}
 }
 
 void addPianoTwoBeat(uint8_t beat){
@@ -79,6 +82,9 @@ void addPianoTwoBeat(uint8_t beat){
 		}
 		beat = beat >> 1;
 	}
+	for (int i = 0; i < AUDIOBUFFERSIZE; i++) {
+			PIANOTWOBuffer[i] *= volume;
+		}
 }
 
 void addDrumBeat(uint8_t beat){
@@ -107,6 +113,9 @@ void addDrumBeat(uint8_t beat){
 			}
 		}
 		beat = beat >> 1;
+	}
+	for (int i = 0; i < AUDIOBUFFERSIZE; i++) {
+		DRUMBuffer[i] *= volume;
 	}
 }
 
