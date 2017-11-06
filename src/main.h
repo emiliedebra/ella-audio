@@ -77,7 +77,7 @@ void setVolume(void);
 uint8_t getTempo(void);
 void setTempo(uint16_t bpm);
 void checkButtons(uint8_t row);
-
+void LEDandButtonUpdate(void);
 void EXTI_Configuration(void);
 void SPI_Configuration(void);
 void SPI_SendLEDData(char red, char green, char blue, char column);

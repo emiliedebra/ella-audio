@@ -213,6 +213,8 @@ void DMA_Configuration(uint16_t * waveBuffer)
 
     /* Enable DMA */
     DMA_Cmd(DMA1_Stream5, ENABLE);
+
+
 }
 
 void DMA0_Configuration() {

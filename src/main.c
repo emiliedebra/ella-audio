@@ -11,6 +11,13 @@ uint32_t ADC1ConvertedValue[2] = {0};
 uint8_t pianoOneArray[8] = {0};
 uint8_t pianoTwoArray[8] = {0};
 uint8_t drumArray[8] = {0};
+uint8_t EArray[8] = {0b00111100, 0b001111110, 0b10010011, 0b10010001, 0b10010001, 0b10010001, 0b01110010, 0b00110100};
+uint8_t LArray[8] = {0b00000000, 0b11111111, 0b11111111, 0b00000011, 0b00000011, 0b00000011, 0b00000011, 0b00000000};
+uint8_t AArray[8] = {0b00011100, 0b00111110, 0b001100011, 0b01000001, 0b01000001, 0b00100010, 0b01111111, 0b00000010};
+uint8_t prevGridBtnStateArray[8] = {0};
+uint8_t prevInstBtnState = 0;
+uint8_t prevControlBtnState = 0;
+
 uint16_t DMA_timerPeriod;
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
@@ -59,7 +66,6 @@ void TIM3_IRQHandler(void)
     TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     STM_EVAL_LEDToggle(LED6);
     //change the LED to show the beat
-    ledOnCol = (ledOnCol+1)&7;
     updateLEDs = 1;
   }
 }
@@ -111,77 +117,30 @@ int main(void)
     while (1) {
 		// check for play or pause pressed (PC2)
     	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2) == Bit_SET){
-			while(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2) == Bit_SET);
-			if (pauseResumeStatus == PAUSE) {
-				resume();
-			}
-			else {
-				pause();
-			}
+    		if( !(prevControlBtnState&(1<<2)) ){
+    			if (pauseResumeStatus == PAUSE) {
+					resume();
+				}
+				else {
+					pause();
+				}
+    		}
+    		prevControlBtnState|=(1<<2);
+		}else{
+			prevControlBtnState&=(~(1<<2));
 		}
     	// check for clear (PC3)
     	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3) == Bit_SET){
-			while(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3) == Bit_SET);
-			stop();
-			continue;
+			if( !(prevControlBtnState&(1<<3)) ){
+				stop();
+			}
+			prevControlBtnState|=(1<<3);
+		}else{
+			prevControlBtnState&=(~(1<<3));
 		}
 
-    	// update the LEDs
-    	if (updateLEDs == 1) {
-			if (ledOnCol != beatCounter) {
-				if (instrument == 0) {
-					SPI_SendLEDData(0x0, 0x0, drumArray[ledOnCol], ledOnCol);
-					GPIO_SetBits(GPIOA,  GPIO_Pin_8);
-					GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_15);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-				}
-				else if (instrument == 1) {
-					SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
-					GPIO_SetBits(GPIOA,  GPIO_Pin_15);
-					GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_8);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-				}
-				else if (instrument == 2) {
-					SPI_SendLEDData(0x0, 0x0, pianoTwoArray[ledOnCol], ledOnCol);
-					GPIO_SetBits(GPIOC,  GPIO_Pin_6);
-					GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_15);
-				}
-				else {
-
-					GPIO_SetBits(GPIOA,  GPIO_Pin_10);
-					GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
-					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-				}
-			}
-			else {
-				if (instrument == 0) {
-					SPI_SendLEDData(getDrumBeat(beatCounter), ~getDrumBeat(beatCounter), 0x0, beatCounter);
-				}
-				else if (instrument == 1) {
-					SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
-				}
-				else if (instrument == 2) {
-					SPI_SendLEDData(getPianoTwoBeat(beatCounter), ~getPianoTwoBeat(beatCounter), 0x0, beatCounter);
-				}
-				STM_EVAL_LEDToggle(LED5);
-			}
-			updateLEDs = 0;
-			// update from all controllers
-
-			if (alternate == 1){
-				row++;
-				if (row > 7) row = 0;
-				checkButtons(row);
-				alternate = 0;
-			}
-			else {
-				alternate++;
-			}
-
-
-			setTempo(getTempo());
-			setVolume();
-			setInstrument();
+    	if(updateLEDs == 1){
+    		LEDandButtonUpdate();
     	}
 
     	// play the audio
@@ -204,6 +163,87 @@ int main(void)
     }
 }
 
+
+void LEDandButtonUpdate(void){
+	// update the LEDs
+
+		//display the selected instruments notes
+		if (ledOnCol != beatCounter) {
+			if (instrument == 0) {
+				SPI_SendLEDData(0x0, 0x0, drumArray[ledOnCol], ledOnCol);
+				GPIO_SetBits(GPIOA,  GPIO_Pin_8);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_15);
+				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+			}
+			else if (instrument == 1) {
+				SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+				GPIO_SetBits(GPIOA,  GPIO_Pin_15);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_8);
+				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+			}
+			else if (instrument == 2) {
+				SPI_SendLEDData(0x0, 0x0, pianoTwoArray[ledOnCol], ledOnCol);
+				GPIO_SetBits(GPIOC,  GPIO_Pin_6);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_15);
+			}
+			else {
+				if(beatCounter==0 || beatCounter==4){
+					SPI_SendLEDData(EArray[ledOnCol], 0, 0, ledOnCol);
+				}else if(beatCounter==1 || beatCounter==5){
+					SPI_SendLEDData(0, LArray[ledOnCol], 0, ledOnCol);
+				}else if(beatCounter==2 || beatCounter==6){
+					SPI_SendLEDData(0, 0, LArray[ledOnCol], ledOnCol);
+				}else{
+					SPI_SendLEDData(AArray[ledOnCol], AArray[ledOnCol], 0, ledOnCol);
+				}
+
+				GPIO_SetBits(GPIOA,  GPIO_Pin_10);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
+				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+			}
+		}
+		//display the cursor
+		else {
+			if (instrument == 0) {
+				SPI_SendLEDData(getDrumBeat(beatCounter), ~getDrumBeat(beatCounter), 0x0, beatCounter);
+			}
+			else if (instrument == 1) {
+				SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
+			}
+			else if (instrument == 2) {
+				SPI_SendLEDData(getPianoTwoBeat(beatCounter), ~getPianoTwoBeat(beatCounter), 0x0, beatCounter);
+			}else{
+				if(beatCounter==0 || beatCounter==4){
+					SPI_SendLEDData(EArray[ledOnCol], 0, 0, ledOnCol);
+				}else if(beatCounter==1 || beatCounter==5){
+					SPI_SendLEDData(0, LArray[ledOnCol], 0, ledOnCol);
+				}else if(beatCounter==2 || beatCounter==6){
+					SPI_SendLEDData(0, 0, LArray[ledOnCol], ledOnCol);
+				}else{
+					SPI_SendLEDData(AArray[ledOnCol], AArray[ledOnCol], 0, ledOnCol);
+				}
+				GPIO_SetBits(GPIOA,  GPIO_Pin_10);
+				GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
+				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+			}
+			STM_EVAL_LEDToggle(LED5);
+		}
+		//update the LED col that we are on for multiplexing
+		ledOnCol = (ledOnCol+1)&7;
+		updateLEDs = 0;
+		// update from all controllers
+
+		row++;
+		if (row > 7) row = 0;
+		checkButtons(row);
+
+		setTempo(getTempo());
+		setVolume();
+		setInstrument();
+
+}
+
+
 /**
   * @brief  : checks for button presses on all grid elements and adds to respective instrument arrays
   * @param  : None
@@ -218,24 +258,25 @@ void checkButtons(uint8_t row){
 		for(uint8_t col = 8; col<16; col++){
 			//if(buttonSetFlag == 1) return;
 			if(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET){
-				while(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET);
-				// if drum selected
+				//while(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET);
+				delay_ms(5);
+				if(!(prevGridBtnStateArray[row]&(1<<(col-8)))){
+					if (instrument == 0) {
+						drumArray[col-8] = drumArray[col-8] ^ (0b10000000>>row);
+					}
+					// else if piano one selected
+					else if (instrument == 1) {
+						pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
+					}
+					// else if piano two selected
+					else if (instrument == 2) {
+						pianoTwoArray[col-8] = pianoTwoArray[col-8] ^ (0b10000000>>row);
+					}
+				}
+				prevGridBtnStateArray[row]|=(1<<(col-8));
 
-				if (instrument == 0) {
-					drumArray[col-8] = drumArray[col-8] ^ (0b10000000>>row);
-					//buttonSetFlag = 1;
-				}
-				// else if piano one selected
-				else if (instrument == 1) {
-					pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
-					//buttonSetFlag = 1;
-				}
-				// else if piano two selected
-				else if (instrument == 2) {
-					pianoTwoArray[col-8] = pianoTwoArray[col-8] ^ (0b10000000>>row);
-					//buttonSetFlag = 1;
-				}
-				// delay_ms(1);
+			}else{
+				prevGridBtnStateArray[row]&=(~(1<<(col-8)));
 			}
 
 		}
@@ -315,8 +356,12 @@ void DMA_ChangeBuffer(uint16_t *waveBuffer){
 void setInstrument() {
 	for(uint8_t button = 12; button<16; button++){
 		if(GPIO_ReadInputDataBit(GPIOD, (1<<button)) == Bit_SET){
-			while(GPIO_ReadInputDataBit(GPIOD, (1<<button)) == Bit_SET);
-			instrument = button-12;
+			if( !(prevInstBtnState&(1<<(button-12))) ){
+				instrument = button-12;
+			}
+			prevInstBtnState|=(1<<(button-12));
+		}else{
+			prevInstBtnState&=(~(1<<(button-12)));
 		}
 	}
 }
