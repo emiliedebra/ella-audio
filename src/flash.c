@@ -102,9 +102,9 @@ void programFlash() {
       Address = Address + 2;
     }
 
-    // Program B2
+    // Program B1
     fillFlashBuffer(frequency[9]);
-    Address = B2_START;
+    Address = B1_START;
     for (int i = 0; i < AUDIOBUFFERSIZE; i++)
     {
   	FLASH_ProgramHalfWord(Address, PIANOONEBuffer[i]);

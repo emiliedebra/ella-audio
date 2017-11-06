@@ -8,15 +8,6 @@ extern unsigned char closedHiHat2[];
 extern unsigned char crash[];
 extern unsigned char hiTom[];
 extern unsigned char openHiHat[];
-//
-//extern unsigned char violin_a2[];
-//extern unsigned char violin_b2[];
-//extern unsigned char violin_c3[];
-//extern unsigned char violin_d3[];
-//extern unsigned char violin_e3[];
-//extern unsigned char violin_f3[];
-//extern unsigned char violin_g3[];
-//extern unsigned char violin_a3[];
 
 /**
   * @brief  fills respective buffers from flash (overwrite)
@@ -245,7 +236,7 @@ void addToPianoOneBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		PIANOONEBuffer[n] = (uint16_t)(PIANOONEBuffer[n] + *(uint16_t*)(Address) - (PIANOONEBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		PIANOONEBuffer[n] = volume*(uint16_t)(PIANOONEBuffer[n] + *(uint16_t*)(Address) - (PIANOONEBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
 		Address += 2;
 	}
 }
@@ -254,7 +245,7 @@ void addToDrumBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		DRUMBuffer[n] = (uint16_t)(DRUMBuffer[n] + *(uint16_t*)(Address) - (DRUMBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		DRUMBuffer[n] = volume*(uint16_t)(DRUMBuffer[n] + *(uint16_t*)(Address) - (DRUMBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
 		Address += 2;
 	}
 }
@@ -263,7 +254,7 @@ void addToPianoTwoBuffer(uint32_t frequencyADDR) {
 	uint32_t Address = frequencyADDR;
 	for (uint16_t n = 0; n < AUDIOBUFFERSIZE; n++)
 	{
-		PIANOTWOBuffer[n] = (uint16_t)(PIANOTWOBuffer[n] + *(uint16_t*)(Address) - (PIANOTWOBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
+		PIANOTWOBuffer[n] = volume*(uint16_t)(PIANOTWOBuffer[n] + *(uint16_t*)(Address) - (PIANOTWOBuffer[n]*(*(uint16_t*)(Address)))/(double)2048);
 		Address += 2;
 	}
 }

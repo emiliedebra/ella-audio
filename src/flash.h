@@ -43,7 +43,7 @@
 
 /**** PIANO TWO MACROS ****/
 #define A2_START				((uint32_t)0x080E4E20)
-#define B2_START				((uint32_t)0x080E7530)
+#define B1_START				((uint32_t)0x080E7530)
 #define C2_START				((uint32_t)0x080E9C40)
 #define D2_START				((uint32_t)0x080EC350)
 #define E2_START				((uint32_t)0x080EEA60)
