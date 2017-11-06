@@ -150,6 +150,56 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f40xx.s/startup_stm32f427x.s).                         */
 /******************************************************************************/
 
+/*******************************************************************************
+* Function Name  : TIM2_IRQHandler
+* Description    : This function handles TIM2 global interrupt request.
+* 				   This timer represents the tempo of the instrument and
+* 				   thus the interrupt causes the beat.
+*******************************************************************************/
+void TIM2_IRQHandler(void) {
+  if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
+    TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+
+    //change the LED to show the beat
+    //STM_EVAL_LEDToggle(LED4);
+    //set the beat flag so a beat can be computed and played in the main loop
+    beatFlag = 1;
+  }
+}
+
+/*******************************************************************************
+* Function Name  : TIM3_IRQHandler
+* Description    : This function handles TIM3 global interrupt request.
+* 				   This timer represents the refresh rate of the LEDs and the
+* 				   checking for button presses.
+*******************************************************************************/
+void TIM3_IRQHandler(void)  {
+  if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) {
+    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+    //update the flag
+    updateInterfaceFlag = 1;
+  }
+}
+
+/*******************************************************************************
+* Function Name  : DMA1_Stream5_IRQHandler
+* Description    : This function handles the Transfer Complete Interrupt of the
+* 				   DMA1 Stream 5. This checks will cause the change from audio
+* 				   playing back to silence.
+*******************************************************************************/
+void DMA1_Stream5_IRQHandler(void){
+	if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5) == SET) {
+		DMA_ClearITPendingBit(DMA1_Stream4, DMA_IT_TCIF5);
+		//if audio is playing now, then we want to change back to silence
+		if (audioPlayingFlag == 1){
+			DMA_ChangeBuffer(silenceBuffer);
+			audioPlayingFlag = 0;
+		}
+	}
+}
+
+
+
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None

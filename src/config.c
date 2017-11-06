@@ -1,4 +1,4 @@
-#include "main.h"
+#include "config.h"
 
 /**
   * @brief  Configures the different system clocks.
@@ -181,7 +181,7 @@ void GPIO_Configuration(void)
   * @param  None
   * @retval : None
   */
-void DMA_Configuration(uint16_t * waveBuffer)
+void DMA_Configuration(uint16_t * waveBuffer, uint32_t bufferSize)
 {
     DMA_InitTypeDef DMA_InitStructure;
 
@@ -193,7 +193,7 @@ void DMA_Configuration(uint16_t * waveBuffer)
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(DAC_BASE + 0x08);		//what peripheral we are linking the DMA to
     DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)(waveBuffer);				//what data we are linking to the DMA
     DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;						//the direction things must flow: memory to peripheral
-    DMA_InitStructure.DMA_BufferSize = (uint32_t)AUDIOBUFFERSIZE;				//the size, or length of the data
+    DMA_InitStructure.DMA_BufferSize = bufferSize;				//the size, or length of the data
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;			//We dont want to change the location of the peripheral we send to, so we disable the peripheral address increment
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;						//We want to increment the address of the data we are sening (else we send the same segment of data over and o
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; //The size of the peripherals data size (so how much the peripheral can accept at one time)
@@ -217,27 +217,7 @@ void DMA_Configuration(uint16_t * waveBuffer)
 
 }
 
-void DMA0_Configuration() {
-//	DMA_InitTypeDef DMA_InitStructure;
-//	// Channel 0 Stream 0 init (for ADC)
-//	DMA_InitStructure.DMA_Channel = DMA_Channel_2;
-//	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;//ADC1's data register
-//	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&ADC1ConvertedValue;
-//	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-//	DMA_InitStructure.DMA_BufferSize = 2;
-//	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-//	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-//	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;//Reads 16 bit values
-//	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;//Stores 16 bit values
-//	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-//	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-//	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
-//	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
-//	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-//	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-//	DMA_Init(DMA2_Stream0, &DMA_InitStructure);
-//	DMA_Cmd(DMA2_Stream0, ENABLE);
-}
+
 
 /**
   * @brief  Configures the Timers.

@@ -1,5 +1,7 @@
 
 #include "main.h"
+#include "config.h"
+#include "stm32f4xx_it.h"
 
 /* -------- Variables -------- */
 uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
@@ -21,71 +23,17 @@ uint8_t prevControlBtnState = 0;
 uint16_t DMA_timerPeriod;
 uint8_t beatCounter = 0;
 uint8_t beatFlag = 0;
-uint8_t updateLEDs = 0;
+uint8_t updateInterfaceFlag = 0;
 uint8_t audioPlayingFlag = 0;
 uint8_t ledOnCol = 0;
-uint8_t instrument = 0;
+uint8_t currentInstrument = 0;
 float volume = 0;
 uint8_t row = 0;
-uint8_t alternate = 0;
 uint8_t pauseResumeStatus = PAUSE;
 
 float frequencyScaler = 9.99E-5;
 uint16_t frequency[16] = {220, 246, 261, 293, 329, 349, 392, 440, 110, 61, 65, 73, 82, 87, 98, 55};
 
-/* -------- Handlers --------- */
-/*******************************************************************************
-* Function Name  : TIM2_IRQHandler
-* Description    : This function handles TIM2 global interrupt request.
-* 				   This timer represents the tempo of the instrument and
-* 				   thus the interrupt causes the beat.
-*******************************************************************************/
-void TIM2_IRQHandler(void)
-{
-  if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
-  {
-    TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-
-    //change the LED to show the beat
-    STM_EVAL_LEDToggle(LED4);
-    //set the beat flag so a beat can be computed and played in the main loop
-    beatFlag = 1;
-  }
-}
-
-/*******************************************************************************
-* Function Name  : TIM3_IRQHandler
-* Description    : This function handles TIM3 global interrupt request.
-* 				   This timer represents the tempo of the instrument and
-* 				   thus the interrupt causes the beat.
-*******************************************************************************/
-void TIM3_IRQHandler(void)
-{
-  if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
-  {
-    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-    STM_EVAL_LEDToggle(LED6);
-    //change the LED to show the beat
-    updateLEDs = 1;
-  }
-}
-
-/*******************************************************************************
-* Function Name  : DMA1_Stream5_IRQHandler
-* Description    : This function handles the Transfer Complete Interrupt of the
-* 				   DMA1 Stream 5. This checks will cause the change from audio
-* 				   playing back to silence.
-*******************************************************************************/
-void DMA1_Stream5_IRQHandler(void){
-	if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5) == SET) {
-		DMA_ClearITPendingBit(DMA1_Stream4, DMA_IT_TCIF5);
-		//if audio is playing now, then we want to change back to silence
-		if (audioPlayingFlag == 1){
-			DMA_ChangeBuffer(silenceBuffer);
-			audioPlayingFlag = 0;
-		}
-	}
-}
 
 /**
 **===========================================================================
@@ -111,36 +59,35 @@ int main(void)
     // Set up the micro
     Controller_Setup(DMA_timerPeriod);
     // check the tempo on the hardware and set it to initial value
-    setTempo(getTempo());
+    setTempo();
     setVolume();
 
     while (1) {
 		// check for play or pause pressed (PC2)
     	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2) == Bit_SET){
     		if( !(prevControlBtnState&(1<<2)) ){
-    			if (pauseResumeStatus == PAUSE) {
-					resume();
-				}
-				else {
-					pause();
-				}
+    			(pauseResumeStatus == PAUSE) ? resume() : pause();
     		}
     		prevControlBtnState|=(1<<2);
-		}else{
+		}
+    	else{
 			prevControlBtnState&=(~(1<<2));
 		}
-    	// check for clear (PC3)
+    	// check for clear board (PC3)
     	if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_3) == Bit_SET){
-			if( !(prevControlBtnState&(1<<3)) ){
-				stop();
+			if( !(prevControlBtnState&(1<<3))) {
+				clearInstrument();
 			}
 			prevControlBtnState|=(1<<3);
-		}else{
+		}
+    	else{
 			prevControlBtnState&=(~(1<<3));
 		}
 
-    	if(updateLEDs == 1){
-    		LEDandButtonUpdate();
+    	//if we need to update the interface (LEDs and Buttons)
+    	if(updateInterfaceFlag == 1){
+    		updateInterface();
+    		updateInterfaceFlag = 0;
     	}
 
     	// play the audio
@@ -163,84 +110,99 @@ int main(void)
     }
 }
 
+/**
+**===========================================================================
+**
+**  Helper functions.
+**  These are called from the main method loop to seperate out code
+**
+**===========================================================================
+*/
 
-void LEDandButtonUpdate(void){
-	// update the LEDs
+/**
+  * @brief  : updates the interface hardware. Includes setting LEDs, checking buttons
+  * 		  reading volume and tempo potentiometers, and checking which instrument is selected
+  * @param  : None
+  * @retval : None
+  */
+void updateInterface(void){
+	//display the selected instruments notes and the cursor
+	setLEDs();
 
-		//display the selected instruments notes
-		if (ledOnCol != beatCounter) {
-			if (instrument == 0) {
-				SPI_SendLEDData(0x0, 0x0, drumArray[ledOnCol], ledOnCol);
-				GPIO_SetBits(GPIOA,  GPIO_Pin_8);
-				GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_15);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-			}
-			else if (instrument == 1) {
-				SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
-				GPIO_SetBits(GPIOA,  GPIO_Pin_15);
-				GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_8);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-			}
-			else if (instrument == 2) {
-				SPI_SendLEDData(0x0, 0x0, pianoTwoArray[ledOnCol], ledOnCol);
-				GPIO_SetBits(GPIOC,  GPIO_Pin_6);
-				GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_15);
-			}
-			else {
-				if(beatCounter==0 || beatCounter==4){
-					SPI_SendLEDData(EArray[ledOnCol], 0, 0, ledOnCol);
-				}else if(beatCounter==1 || beatCounter==5){
-					SPI_SendLEDData(0, LArray[ledOnCol], 0, ledOnCol);
-				}else if(beatCounter==2 || beatCounter==6){
-					SPI_SendLEDData(0, 0, LArray[ledOnCol], ledOnCol);
-				}else{
-					SPI_SendLEDData(AArray[ledOnCol], AArray[ledOnCol], 0, ledOnCol);
-				}
+	//update the LED column that we are on for multiplexing
+	ledOnCol = (ledOnCol+1)&7;
 
-				GPIO_SetBits(GPIOA,  GPIO_Pin_10);
-				GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-			}
-		}
-		//display the cursor
-		else {
-			if (instrument == 0) {
-				SPI_SendLEDData(getDrumBeat(beatCounter), ~getDrumBeat(beatCounter), 0x0, beatCounter);
-			}
-			else if (instrument == 1) {
-				SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
-			}
-			else if (instrument == 2) {
-				SPI_SendLEDData(getPianoTwoBeat(beatCounter), ~getPianoTwoBeat(beatCounter), 0x0, beatCounter);
-			}else{
-				if(beatCounter==0 || beatCounter==4){
-					SPI_SendLEDData(EArray[ledOnCol], 0, 0, ledOnCol);
-				}else if(beatCounter==1 || beatCounter==5){
-					SPI_SendLEDData(0, LArray[ledOnCol], 0, ledOnCol);
-				}else if(beatCounter==2 || beatCounter==6){
-					SPI_SendLEDData(0, 0, LArray[ledOnCol], ledOnCol);
-				}else{
-					SPI_SendLEDData(AArray[ledOnCol], AArray[ledOnCol], 0, ledOnCol);
-				}
-				GPIO_SetBits(GPIOA,  GPIO_Pin_10);
-				GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
-				GPIO_ResetBits(GPIOC, GPIO_Pin_6);
-			}
-			STM_EVAL_LEDToggle(LED5);
-		}
-		//update the LED col that we are on for multiplexing
-		ledOnCol = (ledOnCol+1)&7;
-		updateLEDs = 0;
-		// update from all controllers
+	// update from all controllers
+	checkButtons();
+	setTempo();
+	setVolume();
+	setInstrument();
 
-		row++;
-		if (row > 7) row = 0;
-		checkButtons(row);
-
-		setTempo(getTempo());
-		setVolume();
-		setInstrument();
-
+}
+/**
+  * @brief  : updates the LED grid to show the selected instruments notes and the cursor
+  * @param  : None
+  * @retval : None
+  */
+void setLEDs(void){
+	if (ledOnCol != beatCounter) {
+		switch(currentInstrument){
+			case 0: SPI_SendLEDData(0x0, 0x0, drumArray[ledOnCol], ledOnCol);
+					GPIO_SetBits(GPIOA,  GPIO_Pin_8);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_15);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					break;
+			case 1: SPI_SendLEDData(0x0, 0x0, pianoOneArray[ledOnCol], ledOnCol);
+					GPIO_SetBits(GPIOA,  GPIO_Pin_15);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_10 | GPIO_Pin_8);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					break;
+			case 2: SPI_SendLEDData(0x0, 0x0, pianoTwoArray[ledOnCol], ledOnCol);
+					GPIO_SetBits(GPIOC,  GPIO_Pin_6);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_15);
+					break;
+			default:if(beatCounter==0 || beatCounter==4){
+						SPI_SendLEDData(EArray[ledOnCol], 0, 0, ledOnCol);
+					}
+					else if(beatCounter==1 || beatCounter==5){
+						SPI_SendLEDData(0, LArray[ledOnCol], 0, ledOnCol);
+					}
+					else if(beatCounter==2 || beatCounter==6){
+						SPI_SendLEDData(0, 0, LArray[ledOnCol], ledOnCol);
+					}
+					else{
+						SPI_SendLEDData(AArray[ledOnCol], AArray[ledOnCol], 0, ledOnCol);
+					}
+					GPIO_SetBits(GPIOA,  GPIO_Pin_10);
+					GPIO_ResetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_15);
+					GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+					break;
+			}
+	}
+	//display the cursor
+	else {
+		switch(currentInstrument){
+			case 0: SPI_SendLEDData(getDrumBeat(beatCounter), ~getDrumBeat(beatCounter), 0x0, beatCounter);
+					break;
+			case 1: SPI_SendLEDData(getPianoOneBeat(beatCounter), ~getPianoOneBeat(beatCounter), 0x0, beatCounter);
+					break;
+			case 2: SPI_SendLEDData(getPianoTwoBeat(beatCounter), ~getPianoTwoBeat(beatCounter), 0x0, beatCounter);
+					break;
+			default:if(beatCounter==0 || beatCounter==4){
+						SPI_SendLEDData(EArray[ledOnCol], 0, 0, ledOnCol);
+					}
+					else if(beatCounter==1 || beatCounter==5){
+						SPI_SendLEDData(0, LArray[ledOnCol], 0, ledOnCol);
+					}
+					else if(beatCounter==2 || beatCounter==6){
+						SPI_SendLEDData(0, 0, LArray[ledOnCol], ledOnCol);
+					}
+					else{
+						SPI_SendLEDData(AArray[ledOnCol], AArray[ledOnCol], 0, ledOnCol);
+					}
+					break;
+			}
+	}
 }
 
 
@@ -249,42 +211,37 @@ void LEDandButtonUpdate(void){
   * @param  : None
   * @retval : None
   */
-void checkButtons(uint8_t row){
-	//uint8_t buttonSetFlag = 0;
-	//for(uint8_t row = 0; row<8; row++){
-		//check row
-		GPIO_ResetBits(GPIOE, 0b11111111); // reset all bits
-		GPIO_SetBits(GPIOE, (1<<row)); // set current row enabled
-		for(uint8_t col = 8; col<16; col++){
-			//if(buttonSetFlag == 1) return;
-			if(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET){
-				//while(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET);
-				delay_ms(5);
-				if(!(prevGridBtnStateArray[row]&(1<<(col-8)))){
-					if (instrument == 0) {
-						drumArray[col-8] = drumArray[col-8] ^ (0b10000000>>row);
-					}
-					// else if piano one selected
-					else if (instrument == 1) {
-						pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
-					}
-					// else if piano two selected
-					else if (instrument == 2) {
-						pianoTwoArray[col-8] = pianoTwoArray[col-8] ^ (0b10000000>>row);
-					}
+void checkButtons(void){
+	row++;
+	if (row > 7) row = 0;
+
+	GPIO_ResetBits(GPIOE, 0b11111111); // reset all bits
+	GPIO_SetBits(GPIOE, (1<<row)); // set current row enabled
+	for(uint8_t col = 8; col<16; col++){
+		if(GPIO_ReadInputDataBit(GPIOE, (1<<col)) == Bit_SET){
+			delay_ms(5);
+			if(!(prevGridBtnStateArray[row]&(1<<(col-8)))){
+				switch(currentInstrument){
+					case 0: drumArray[col-8] = drumArray[col-8] ^ (0b10000000>>row);
+							break;
+					case 1: pianoOneArray[col-8] = pianoOneArray[col-8] ^ (0b10000000>>row);
+							break;
+					case 2: pianoTwoArray[col-8] = pianoTwoArray[col-8] ^ (0b10000000>>row);
+							break;
+					default: break;
 				}
-				prevGridBtnStateArray[row]|=(1<<(col-8));
-
-			}else{
-				prevGridBtnStateArray[row]&=(~(1<<(col-8)));
 			}
+			prevGridBtnStateArray[row]|=(1<<(col-8));
 
+		}else{
+			prevGridBtnStateArray[row]&=(~(1<<(col-8)));
 		}
-		GPIO_ResetBits(GPIOE, 0b11111111);
-	//}
+
+	}
+	GPIO_ResetBits(GPIOE, 0b11111111); // reset all bits again
 }
 
-/* ---------- Controller Methods ---------- */
+
 /**
   * @brief  : Gets volume
   * @param  : None
@@ -295,25 +252,6 @@ float getVolume() {
 	return (volume*1.1/(double)3860)+0.33161;
 }
 
-/**
-  * @brief  : Gets tempo
-  * @param  : None
-  * @retval : None
-  */
-uint8_t getTempo() {
-	uint16_t tempo = ADC_Convert_Tempo();
-	return (0.0208*tempo + 24.824);
-}
-
-/**
-  * @brief  : Sets the period of TIM2, which is the tempo of the device
-  * @param  : uint16_t bpm
-  * @retval : None
-  */
-void setTempo(uint16_t bpm){
-	uint32_t tempoPeriod = -700 * bpm + 126000;
-	TIM2->ARR = tempoPeriod - 1;
-}
 
 /**
   * @brief  : Sets the volume of output buffer
@@ -324,28 +262,38 @@ void setVolume() {
 	volume = getVolume();
 }
 
-
-void stop() {
-	if (instrument == 0) {
-		memset(drumArray, 0b0, 8);
-	}
-	else if (instrument == 1) {
-		memset(pianoOneArray, 0b0, 8);
-	}
-	else {
-		memset(pianoTwoArray, 0b0, 8);
-	}
+/**
+  * @brief  : Sets the period of TIM2, which is the tempo of the device according to the tempo POT
+  * @param  : uint16_t bpm
+  * @retval : None
+  */
+void setTempo(void){
+	//get the tempo from the POT, and work out the BPM
+	uint16_t tempo = ADC_Convert_Tempo();
+	uint16_t bpm = 0.0208*tempo + 24.824;
+	//work out the period for the Timer and update it
+	uint32_t tempoPeriod = -700 * bpm + 126000;
+	TIM2->ARR = tempoPeriod - 1;
 }
 
 
 /**
-  * @brief  : Changes the buffer the DMA is sending to the DAC
-  * @param  : uint16_t *waveBuffer
+  * @brief  : Clears the current instruments' selected notes
+  * @param  : uint16_t bpm
   * @retval : None
   */
-void DMA_ChangeBuffer(uint16_t *waveBuffer){
-	DMA_Cmd(DMA1_Stream5, DISABLE);
-	DMA_Configuration(waveBuffer);
+void clearInstrument() {
+
+	switch(currentInstrument){
+	case 0: memset(drumArray, 0b0, 8);
+			break;
+	case 1: memset(pianoOneArray, 0b0, 8);
+			break;
+	case 2: memset(pianoTwoArray, 0b0, 8);
+			break;
+	default: break;
+	}
+
 }
 
 /**
@@ -357,7 +305,7 @@ void setInstrument() {
 	for(uint8_t button = 12; button<16; button++){
 		if(GPIO_ReadInputDataBit(GPIOD, (1<<button)) == Bit_SET){
 			if( !(prevInstBtnState&(1<<(button-12))) ){
-				instrument = button-12;
+				currentInstrument = button-12;
 			}
 			prevInstBtnState|=(1<<(button-12));
 		}else{
@@ -365,6 +313,27 @@ void setInstrument() {
 		}
 	}
 }
+
+/**
+**===========================================================================
+**
+**  Peripheral Access functions
+**  These interface with peripherals to send/retrieve data
+**
+**===========================================================================
+*/
+
+
+/**
+  * @brief  : Changes the buffer the DMA is sending to the DAC
+  * @param  : uint16_t *waveBuffer
+  * @retval : None
+  */
+void DMA_ChangeBuffer(uint16_t *waveBuffer){
+	DMA_Cmd(DMA1_Stream5, DISABLE);
+	DMA_Configuration(waveBuffer, (uint32_t)AUDIOBUFFERSIZE);
+}
+
 
 /**
   * @brief  Sends data through SPI to the LEDs to control them
@@ -400,7 +369,15 @@ int ADC_Convert_Tempo(){
 	return ADC_GetConversionValue(ADC1); //Return the converted data
 }
 
-/* ------------ Configuration Methods ----------- */
+
+/**
+**===========================================================================
+**
+**  Configuration functions.
+**  These set up the code
+**
+**===========================================================================
+*/
 /**
  * Sets up all the peripherals and background operations on the micro.
  * Sets up the clocks, NVIC, GPIO pins (pins for audio out, LEDS and Push Button),
@@ -430,8 +407,8 @@ void Controller_Setup(uint16_t DMA_timerPeriod){
 	// DAC Configuration
 	DAC_Configuration();
 	// DMA Config
-	DMA_Configuration(silenceBuffer);
-	DMA0_Configuration();
+	DMA_Configuration(silenceBuffer, (uint32_t)AUDIOBUFFERSIZE);
+	//ADC Config
 	ADC_Configuration();
 	// SPI Config
 	SPI_Configuration();
