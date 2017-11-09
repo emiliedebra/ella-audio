@@ -1,38 +1,11 @@
+/*
+ * The main file for the ELLA Audio Device
+ */
+
 
 #include "main.h"
 #include "config.h"
 #include "stm32f4xx_it.h"
-
-/* -------- Variables -------- */
-uint16_t silenceBuffer[AUDIOBUFFERSIZE] = {0};
-uint16_t PIANOONEBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-uint16_t DRUMBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-uint16_t PIANOTWOBuffer[AUDIOBUFFERSIZE];     /* Array for the waveform */
-uint32_t ADC1ConvertedValue[2] = {0};
-
-uint8_t pianoOneArray[8] = {0};
-uint8_t pianoTwoArray[8] = {0};
-uint8_t drumArray[8] = {0};
-uint8_t EArray[8] = {0b00111100, 0b001111110, 0b10010011, 0b10010001, 0b10010001, 0b10010001, 0b01110010, 0b00110100};
-uint8_t LArray[8] = {0b00000000, 0b11111111, 0b11111111, 0b00000011, 0b00000011, 0b00000011, 0b00000011, 0b00000000};
-uint8_t AArray[8] = {0b00011100, 0b00111110, 0b001100011, 0b01000001, 0b01000001, 0b00100010, 0b01111111, 0b00000010};
-uint8_t prevGridBtnStateArray[8] = {0};
-uint8_t prevInstBtnState = 0;
-uint8_t prevControlBtnState = 0;
-
-uint16_t DMA_timerPeriod;
-uint8_t beatCounter = 0;
-uint8_t beatFlag = 0;
-uint8_t updateInterfaceFlag = 0;
-uint8_t audioPlayingFlag = 0;
-uint8_t ledOnCol = 0;
-uint8_t currentInstrument = 0;
-float volume = 0;
-uint8_t row = 0;
-uint8_t pauseResumeStatus = PAUSE;
-
-float frequencyScaler = 9.99E-5;
-uint16_t frequency[16] = {220, 246, 261, 293, 329, 349, 392, 440, 110, 61, 65, 73, 82, 87, 98, 55};
 
 
 /**
@@ -247,20 +220,11 @@ void checkButtons(void){
   * @param  : None
   * @retval : None
   */
-float getVolume() {
-	volume = ADC_Convert_Volume();
-	return (volume*1.1/(double)3860)+0.33161;
-}
-
-
-/**
-  * @brief  : Sets the volume of output buffer
-  * @param  : None
-  * @retval : None
-  */
 void setVolume() {
-	volume = getVolume();
+	int temp = ADC_Convert_Volume();
+	volume = (float)(temp*1.1/(float)3860)+0.33161;
 }
+
 
 /**
   * @brief  : Sets the period of TIM2, which is the tempo of the device according to the tempo POT
